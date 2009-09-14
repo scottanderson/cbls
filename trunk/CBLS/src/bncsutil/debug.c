@@ -6,7 +6,7 @@
  * April 1, 2006
  */
 
-#include <bncsutil/debug.h>
+#include "debug.h"
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>

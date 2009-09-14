@@ -23,7 +23,7 @@
  * Boston, MA  02111-1307  USA
  */
 
-#include <bncsutil/mutil.h>
+#include "mutil.h>
 
 typedef struct msg_buffer *msg_buffer_t;
 typedef struct msg_buffer_impl *msg_buffer_impl_t;

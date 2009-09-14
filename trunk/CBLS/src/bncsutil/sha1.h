@@ -17,7 +17,7 @@
 #ifndef _SHA1_H_
 #define _SHA1_H_
 
-#include <bncsutil/mutil.h>
+#include "mutil.h"
 
 #ifdef __cplusplus
 extern "C" {

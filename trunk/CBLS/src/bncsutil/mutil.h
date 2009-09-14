@@ -173,6 +173,6 @@
 #define NULL 0
 #endif /* NULL */
 
-// #include <bncsutil/debug.h>
+// #include "debug.h>
 
 #endif /* MUTIL_H */

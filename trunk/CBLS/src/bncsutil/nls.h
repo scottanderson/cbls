@@ -26,7 +26,7 @@
 #ifndef BNCSUTIL_NLS_H_INCLUDED
 #define BNCSUTIL_NLS_H_INCLUDED
 
-#include <bncsutil/mutil.h>
+#include "mutil.h"
 
 // modulus ("N") in base-16
 #define NLS_VAR_N_STR \

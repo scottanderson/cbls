@@ -23,8 +23,8 @@
  * Boston, MA  02111-1307  USA
  */
 
-#include <bncsutil/mutil.h>
-#include <bncsutil/bsha1.h>
+#include "mutil.h"
+#include "bsha1.h"
 #include <cstring>
 
 #define USE_NEW_BSHA1	0

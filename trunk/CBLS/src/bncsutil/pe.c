@@ -23,8 +23,8 @@
  * Boston, MA  02111-1307  USA
  */
 
-#include <bncsutil/pe.h>
-#include <bncsutil/stack.h>
+#include "pe.h"
+#include "stack.h"
 #include <stdlib.h>
 #include <string.h>
 

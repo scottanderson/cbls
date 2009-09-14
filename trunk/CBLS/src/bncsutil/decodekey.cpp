@@ -27,9 +27,9 @@
 #ifndef DECODECDKEY_CPP
 #define DECODECDKEY_CPP
 
-#include <bncsutil/mutil.h>
-#include <bncsutil/cdkeydecoder.h>
-#include <bncsutil/decodekey.h>
+#include "mutil.h"
+#include "cdkeydecoder.h"
+#include "decodekey.h"
 
 #ifdef MOS_WINDOWS
 	#include <windows.h>

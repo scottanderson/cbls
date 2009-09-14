@@ -23,8 +23,8 @@
  * Boston, MA  02111-1307  USA
  */
 
-#include <bncsutil/mutil.h>
-#include <bncsutil/libinfo.h>
+#include "mutil.h"
+#include "libinfo.h"
 #include <cstdio>
 
 MEXP(unsigned long) bncsutil_getVersion() {

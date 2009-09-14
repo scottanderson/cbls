@@ -30,7 +30,7 @@
 /* #include <windows.h> */
 /* #endif */
 
-/* #include <bncsutil/mutil.h> */
+/* #include "mutil.h> */
 /* #include <stdio.h> */
 
 /* typedef struct _bncsutil_debug_env* debug_env_t; */

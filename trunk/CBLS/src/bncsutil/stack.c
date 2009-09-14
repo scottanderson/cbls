@@ -31,7 +31,7 @@
  * May 13, 2005
  */
 
-#include <bncsutil/stack.h>
+#include "stack.h"
 #include <stdlib.h>
  
 cm_stack_t cm_stack_create()

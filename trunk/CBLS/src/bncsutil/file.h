@@ -26,7 +26,7 @@
 #ifndef _FILE_H_INCLUDED_
 #define _FILE_H_INCLUDED_ 1
 
-#include <bncsutil/mutil.h>
+#include "mutil.h"
 
 #ifdef MOS_WINDOWS
 typedef long off_t;
