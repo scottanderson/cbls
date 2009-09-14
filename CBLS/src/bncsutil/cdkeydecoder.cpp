@@ -23,15 +23,15 @@
  * Boston, MA  02111-1307  USA
  */
  
-#include <bncsutil/mutil.h>
-#include <bncsutil/cdkeydecoder.h>
-#include <bncsutil/keytables.h> // w2/d2 and w3 tables
-#include <bncsutil/bsha1.h> // Broken SHA-1
-#include <bncsutil/sha1.h> // US Secure Hash Algorithm (for W3)
+#include "mutil.h"
+#include "cdkeydecoder.h"
+#include "keytables.h" // w2/d2 and w3 tables
+#include "bsha1.h" // Broken SHA-1
+#include "sha1.h" // US Secure Hash Algorithm (for W3)
 #include <cctype> // for isdigit(), isalnum(), and toupper()
 #include <cstring> // for memcpy()
 #include <cstdio> // for sscanf()
-// #include <bncsutil/debug.h>
+// #include "debug.h>
 
 /**
  * Implementation-specific CD-key hash structure.

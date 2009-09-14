@@ -23,9 +23,9 @@
  * Boston, MA  02111-1307  USA
  */
  
-#include <bncsutil/mutil.h>
-#include <bncsutil/checkrevision.h>
-#include <bncsutil/file.h>
+#include "mutil.h"
+#include "checkrevision.h"
+#include "file.h"
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
@@ -34,7 +34,7 @@
 #ifdef MOS_WINDOWS
 #include <windows.h>
 #else
-#include <bncsutil/pe.h>
+#include "pe.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>

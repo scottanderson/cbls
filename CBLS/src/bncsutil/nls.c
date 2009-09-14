@@ -23,8 +23,8 @@
  * Boston, MA  02111-1307  USA
  */
 
-#include <bncsutil/nls.h>
-#include <bncsutil/sha1.h>
+#include "nls.h"
+#include "sha1.h"
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>

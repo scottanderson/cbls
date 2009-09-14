@@ -26,7 +26,7 @@
 #ifndef BNCSUTIL_CDKEYDECODER_H
 #define BNCSUTIL_CDKEYDECODER_H
 
-#include <bncsutil/mutil.h>
+#include "mutil.h"
  
 /**
  * Internal key type constants.

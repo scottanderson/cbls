@@ -23,9 +23,9 @@
  * Boston, MA  02111-1307  USA
  */
  
-#include <bncsutil/mutil.h> // for MEXP()
-#include <bncsutil/bsha1.h>
-#include <bncsutil/oldauth.h>
+#include "mutil.h" // for MEXP()
+#include "bsha1.h"
+#include "oldauth.h"
 #include <cstring> // for strlen
 
 /**
