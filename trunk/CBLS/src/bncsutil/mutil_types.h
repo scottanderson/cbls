@@ -27,7 +27,7 @@
 #define BNCSUTIL_MUTIL_TYPES_H_INCLUDED
 
 #ifdef WIN32
- #include "ms_stdint.h"
+ #include <stdint.h>
 #else
 
 #if defined(_MSC_VER) || (defined(HAVE_STDINT_H) && !HAVE_STDINT_H)
