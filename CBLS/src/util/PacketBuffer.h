@@ -8,8 +8,41 @@
 #ifndef PACKETBUFFER_H_
 #define PACKETBUFFER_H_
 
-//Get Packets
+class DataInBuffer
+{
+public:
+	DataInBuffer();
+	~DataInBuffer();
+protected:
+	unsigned char in_data[];
 
-//Read Packets
+	DataInBuffer::DataInBuffer()
+	{
 
+	}
+
+	DataInBuffer::~DataInBuffer()
+	{
+
+	}
+};
+
+class DataOutBuffer
+{
+public:
+	DataOutBuffer();
+	~DataOutBuffer();
+protected:
+	unsigned char out_data[];
+
+	DataOutBuffer::DataOutBuffer()
+	{
+
+	}
+
+	DataOutBuffer::~DataOutBuffer()
+	{
+
+	}
+};
 #endif /* PACKETBUFFER_H_ */
