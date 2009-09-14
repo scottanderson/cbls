@@ -129,36 +129,36 @@
 #define MSB4(num) SWAP4(num)
 #endif /* (endianness) */
 
-#ifndef MOS_WINDOWS 
+#ifndef MOS_WINDOWS
 /* attempt automatic Windows detection  */
-  #ifdef _MSC_VER 
+  #ifdef _MSC_VER
     /* Microsoft C++ compiler, has to be windows  */
-    #define MOS_WINDOWS 
-  #else 
+    #define MOS_WINDOWS
+  #else
     #if defined(_WIN) || defined(_WINDOWS) || defined(WINDOWS) || \
     defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64)
       #define MOS_WINDOWS
-    #endif 
-  #endif 
+    #endif
+  #endif
 #endif
 
 #if !(defined(MUTIL_LIB_BUILD)) && defined(BNCSUTIL_EXPORTS)
 #  define MUTIL_LIB_BUILD
 #endif
 
-#ifdef MOS_WINDOWS
-#  ifdef MUTIL_LIB_BUILD
-#    if 1
-#      define MEXP(type) __declspec(dllexport) type __stdcall
-#    else
-#      define MEXP(type) type __stdcall
-#    endif
-#    define MCEXP(name) class __declspec(dllexport) name
-#  else
-#    define MEXP(type) __declspec(dllimport) type __stdcall
-#    define MCEXP(name) class __declspec(dllimport) name
-#  endif
-#else
+//#ifdef MOS_WINDOWS
+//#  ifdef MUTIL_LIB_BUILD
+//#    if 1
+//#      define MEXP(type) __declspec(dllexport) type __stdcall
+//#    else
+//#      define MEXP(type) type __stdcall
+//#    endif
+//#    define MCEXP(name) class __declspec(dllexport) name
+//#  else
+//#    define MEXP(type) __declspec(dllimport) type __stdcall
+//#    define MCEXP(name) class __declspec(dllimport) name
+//#  endif
+//#else
 #  ifdef MUTIL_LIB_BUILD
 #    define MEXP(type) type
 #    define MCEXP(name) class name
@@ -166,7 +166,7 @@
 #    define MEXP(type) extern type
 #    define MCEXP(name) class name
 #  endif
-#endif
+//#endif
 #define MYRIAD_UTIL
 
 #ifndef NULL
