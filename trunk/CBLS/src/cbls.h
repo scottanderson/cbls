@@ -2,11 +2,11 @@
 #ifndef CBLS_H_INCLUDED
 #define CBLS_H_INCLUDED
 
-#if !defined(u_int32_t)
+#if defined(__WIN32__)
 //FIXME: this should go somewhere else
-#define u_int8_t unsigned __int8
-#define u_int16_t unsigned __int16
-#define u_int32_t unsigned __int32
+typedef unsigned __int8 u_int8_t;
+typedef unsigned __int16 u_int16_t;
+typedef unsigned __int32 u_int32_t;
 #endif
 
 struct qbuf {
