@@ -29,7 +29,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
-#include "gmp.h"
+#include <gmp.h>
 
 struct _nls {
     const char* username;
