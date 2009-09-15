@@ -1,14 +1,5 @@
 #include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <signal.h>
-//#include "xmalloc.h"
+#include <sys/types.h>
 #if defined(__WIN32__)
 #  include <winsock2.h>
 #else
