@@ -83,7 +83,7 @@ file_t file_open(const char* filename, unsigned int mode)
 		delete data;
 		return (file_t) 0;
 	}
-	strcpy_s((char*) data->filename, filename_buf_len, filename);
+	//strcpy_s((char*) data->filename, filename_buf_len, filename);
 	
 	data->f = file;
 	
@@ -100,7 +100,7 @@ void file_close(file_t file)
 	}
 	
 	for (it = file->mappings.begin(); it != file->mappings.end(); it++) {
-		UnmapViewOfFile((*it).first);
+		//UnmapViewOfFile((*it).first);
 		CloseHandle((*it).second);
 	}
 	
@@ -176,7 +176,7 @@ void file_unmap(file_t file, const void* base)
 	
 	mapping = (*item).second;
 	
-	UnmapViewOfFile(base);
+	//UnmapViewOfFile(base);
 	CloseHandle(mapping);
 	
 	file->mappings.erase(item);
