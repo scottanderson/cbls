@@ -1,10 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #if defined(__WIN32__)
 #  include <winsock2.h>
 #else
-#  include <linux/socket.h>
-#  include <sys/select.h>
+#  include <netinet/in.h>
 #endif
 #include "cbls.h"
 
@@ -27,13 +27,13 @@ int main(int argc __attribute__((__unused__)), char **argv __attribute__((__unus
 	FD_ZERO(&cbls_rfds);
 	FD_ZERO(&cbls_wfds);
 
-	SOCKET listen_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	int listen_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (listen_sock < 0) {
 		printf("socket() failed");
 		exit(1);
 	}
 
-	SOCKADDR_IN saddr;
+	struct sockaddr_in saddr;
 	saddr.sin_family = AF_INET;
 	saddr.sin_port = htons(9367);
 
