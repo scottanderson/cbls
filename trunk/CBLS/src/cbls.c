@@ -260,7 +260,10 @@ main(int argc __attribute__((__unused__)), char **argv __attribute__((__unused__
 	/* init winsock */
 	WSADATA wsadata;
 
-	WSAStartup(1, &wsadata);
+	if(WSAStartup(1, &wsadata) != NO_ERROR) {
+		cbls_log("WSAStartup() failed");
+		exit(1);
+	}
 #endif
 
 	cbls_open_max = get_open_max();
@@ -275,9 +278,15 @@ main(int argc __attribute__((__unused__)), char **argv __attribute__((__unused__
 		exit(1);
 	}
 
+	struct hostent* thisHost = gethostbyname("");
+	char *ip = inet_ntoa(*(struct in_addr *)*thisHost->h_addr_list);
+	int port = 9367;
+	cbls_log("%s:%d", ip, port);
+
 	struct sockaddr_in saddr;
 	saddr.sin_family = AF_INET;
-	saddr.sin_port = htons(9367);
+	saddr.sin_port = htons(port);
+	saddr.sin_addr.s_addr = inet_addr(ip);
 
 	if(bind(listen_sock, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
 		cbls_log("bind() failed");
