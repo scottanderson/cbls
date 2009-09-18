@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <time.h>
 #if defined(__WIN32__)
-#  include <winsock2.h>
+#  include <winsock.h>
 #else
 #  include <netinet/in.h>
 #endif
@@ -35,11 +35,11 @@ cbls_log (const char *fmt, ...)
 	char buf[2048];
 	int len;
 	time_t t;
-	struct tm tm;
+	struct tm *tm;
 
 	time(&t);
-	localtime_r(&t, &tm);
-	strftime(buf, 21, "%H:%M:%S %m/%d/%Y\t", &tm);
+	tm = localtime(&t);
+	strftime(buf, 21, "%H:%M:%S %m/%d/%Y\t", tm);
 	va_start(ap, fmt);
 	len = vsnprintf(&buf[20], sizeof(buf) - 24, fmt, ap);
 	va_end(ap);
@@ -279,8 +279,7 @@ main(int argc __attribute__((__unused__)), char **argv __attribute__((__unused__
 	saddr.sin_family = AF_INET;
 	saddr.sin_port = htons(9367);
 
-	int r = bind(listen_sock, (struct sockaddr *)&saddr, sizeof(saddr));
-	if(r < 0) {
+	if(bind(listen_sock, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
 		cbls_log("bind() failed");
 		exit(1);
 	}
