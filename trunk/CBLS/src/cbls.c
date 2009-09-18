@@ -253,8 +253,7 @@ listen_ready_read (int fd)
 //	cbls_accepted(cbls);
 }
 
-int
-main(int argc __attribute__((__unused__)), char **argv __attribute__((__unused__)), char **envp)
+int main(int argc __attribute__((__unused__)), char **argv __attribute__((__unused__)), char **envp)
 {
 #if defined(__WIN32__)
 	/* init winsock */
@@ -278,15 +277,19 @@ main(int argc __attribute__((__unused__)), char **argv __attribute__((__unused__
 		exit(1);
 	}
 
+	int port = 9367;
+#if defined(__WIN32__)
 	struct hostent* thisHost = gethostbyname("");
 	char *ip = inet_ntoa(*(struct in_addr *)*thisHost->h_addr_list);
-	int port = 9367;
 	cbls_log("%s:%d", ip, port);
+#endif
 
 	struct sockaddr_in saddr;
 	saddr.sin_family = AF_INET;
 	saddr.sin_port = htons(port);
+#if defined(__WIN32__)
 	saddr.sin_addr.s_addr = inet_addr(ip);
+#endif
 
 	if(bind(listen_sock, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
 		cbls_log("bind() failed");
