@@ -1,3 +1,10 @@
+/*
+ * cbls.c
+ *
+ *  Created on: Sep 15, 2009
+ *      Author: Scott
+ */
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -9,16 +16,15 @@
 #else
 #  include <netinet/in.h>
 #endif
+#include "util/inetlib.h"
 #include "cbls.h"
-
+#include "cbls_fd.h"
 
 int cbls_open_max = 0;
 struct cbls_file *cbls_files = 0;
 
 int nr_open_files = 3;
 
-int high_fd = 0;
-fd_set cbls_rfds, cbls_wfds;
 struct timeval server_start_time;
 
 static void loopZ (void) __attribute__((__noreturn__));
@@ -51,7 +57,9 @@ cbls_log (const char *fmt, ...)
 	//SYS_fsync(log_fd);
 }
 
-int get_open_max(void) {
+int
+get_open_max(void)
+{
 	int om;
 
 #if defined(_SC_OPEN_MAX)
@@ -84,42 +92,11 @@ int get_open_max(void) {
 	return om;
 }
 
-
-
-void cbls_fd_add (int fd)
+static void
+loopZ (void)
 {
-	if (high_fd < fd)
-		high_fd = fd;
-}
-
-void cbls_fd_del (int fd)
-{
-	if (high_fd == fd) {
-		for (fd--; fd && !FD_ISSET(fd, &cbls_rfds); fd--)
-			;
-		high_fd = fd;
-	}
-}
-
-void cbls_fd_set (int fd, int rw)
-{
-	if (rw & FDR)
-		FD_SET(fd, &cbls_rfds);
-	if (rw & FDW)
-		FD_SET(fd, &cbls_wfds);
-}
-
-void cbls_fd_clr (int fd, int rw)
-{
-	if (rw & FDR)
-		FD_CLR(fd, &cbls_rfds);
-	if (rw & FDW)
-		FD_CLR(fd, &cbls_wfds);
-}
-
-static void loopZ (void) {
 	fd_set rfds, wfds;
-	struct timeval before, tv;
+	struct timeval /*before,*/ tv;
 
 	gettimeofday(&tv, 0);
 	for (;;) {
@@ -166,50 +143,6 @@ static void loopZ (void) {
 	}
 }
 
-
-int
-inet_ntoa_r (struct in_addr in, char *buf, size_t buflen)
-{
-	u_int32_t addr = in.s_addr;
-	register u_int8_t *addr_p = (u_int8_t *)&addr, *t;
-	register unsigned int i, pos;
-	u_int8_t tmp[4];
-
-	for (i = 4, pos = 0; ; addr_p++) {
-		i--;
-		t = tmp;
-		do {
-			*t++ = "0123456789"[*addr_p % 10];
-		} while (*addr_p /= 10);
-		for (; t > tmp; pos++) {
-			if (pos >= buflen)
-				return -1;
-			buf[pos] = *--t;
-		}
-		if (!i)
-			break;
-		if (pos >= buflen)
-			return -1;
-		buf[pos++] = '.';
-	}
-
-	if (pos >= buflen)
-		return -1;
-	buf[pos] = 0;
-
-	return pos;
-}
-
-void
-inaddr2str (char abuf[HOSTLEN+1], struct SOCKADDR_IN *sa)
-{
-#ifdef CONFIG_IPV6
-	inet_ntop(AFINET, (char *)&sa->SIN_ADDR, abuf, HOSTLEN+1);
-#else
-	inet_ntoa_r(sa->SIN_ADDR, abuf, 16);
-#endif
-}
-
 static void
 listen_ready_read (int fd)
 {
@@ -253,7 +186,8 @@ listen_ready_read (int fd)
 //	cbls_accepted(cbls);
 }
 
-int main(int argc __attribute__((__unused__)), char **argv __attribute__((__unused__)), char **envp)
+int
+main(int argc __attribute__((__unused__)), char **argv __attribute__((__unused__)), char **envp)
 {
 #if defined(__WIN32__)
 	/* init winsock */
