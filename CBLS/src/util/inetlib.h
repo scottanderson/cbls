@@ -16,15 +16,6 @@
 #  error "Unknown platform"
 #endif
 
-#if defined(__WIN32__)
-//FIXME: this should go somewhere else
-typedef unsigned __int8 u_int8_t;
-typedef unsigned __int16 u_int16_t;
-typedef unsigned __int32 u_int32_t;
-#else
-#include <sys/types.h>
-#endif
-
 /* IPv6 */
 #ifdef CONFIG_IPV6
 #define HOSTLEN 63
