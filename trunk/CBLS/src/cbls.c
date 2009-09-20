@@ -8,9 +8,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <sys/types.h>
+#include <sys/time.h>
 #include <errno.h>
 #include <time.h>
+#include <io.h> // for write()
+#include "util/types.h"
 #include "util/inetlib.h"
 #include "cbls.h"
 #include "cbls_fd.h"
