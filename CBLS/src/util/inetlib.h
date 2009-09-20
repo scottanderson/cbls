@@ -20,6 +20,7 @@
 #ifdef CONFIG_IPV6
 #define HOSTLEN 63
 #define SOCKADDR_IN sockaddr_in6
+#define SOCKADDR sockaddr6
 #define SIN_PORT sin6_port
 #define SIN_FAMILY sin6_family
 #define SIN_ADDR sin6_addr
@@ -30,6 +31,7 @@
 /* IPv4 */
 #define HOSTLEN 15
 #define SOCKADDR_IN sockaddr_in
+#define SOCKADDR sockaddr
 #define SIN_PORT sin_port
 #define SIN_FAMILY sin_family
 #define SIN_ADDR sin_addr
