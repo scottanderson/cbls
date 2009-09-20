@@ -11,6 +11,10 @@
 #include <netinet/in.h>
 #endif
 
+#if defined(__APPLE__)
+#include <sys/errno.h>
+#endif
+
 /* IPv6 */
 #ifdef CONFIG_IPV6
 #define HOSTLEN 63
