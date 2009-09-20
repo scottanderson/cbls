@@ -64,7 +64,7 @@ get_open_max(void)
 		struct rlimit rlimit;
 
 		if (getrlimit(RLIMIT_NOFILE, &rlimit)) {
-			hxd_log("main: getrlimit: %s", strerror(errno));
+			cbls_log("main: getrlimit: %s", strerror(errno));
 			exit(1);
 		}
 		om = rlimit.rlim_max;
@@ -142,12 +142,12 @@ static void
 listen_ready_read (int fd)
 {
 	int s;
-	struct sockaddr_in saddr;
+	struct SOCKADDR_IN saddr;
 	int siz = sizeof(saddr);
 	char abuf[16];
 //	struct cbls_conn *cbls;
 
-	s = accept(fd, (struct sockaddr *)&saddr, &siz);
+	s = accept(fd, (struct SOCKADDR *)&saddr, &siz);
 	if (s < 0) {
 		cbls_log("cbls: accept: %s", strerror(errno));
 		return;

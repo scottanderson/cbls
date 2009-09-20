@@ -10,9 +10,7 @@
 
 #if defined(__WIN32__)
 #  include <winsock.h>
-#elif defined(__DARWIN__)
-#  include <sys/select.h>
-#elif defined(__LINUX__)
+#elif defined(__APPLE__) || defined(__LINUX__)
 #  include <netinet/in.h>
 #else
 #  error "Unknown platform"
@@ -23,6 +21,8 @@
 typedef unsigned __int8 u_int8_t;
 typedef unsigned __int16 u_int16_t;
 typedef unsigned __int32 u_int32_t;
+#else
+#include <sys/types.h>
 #endif
 
 /* IPv6 */
