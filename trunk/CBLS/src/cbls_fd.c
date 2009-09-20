@@ -5,8 +5,8 @@
  *      Author: Scott
  */
 
-#include "util/types.h"
-#include "util/inetlib.h"
+#include "sys_types.h"
+#include "sys_net.h"
 #include "cbls_fd.h"
 
 int high_fd = 0;

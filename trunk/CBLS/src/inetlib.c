@@ -6,7 +6,7 @@
  */
 
 #include "inetlib.h"
-#include "types.h"
+#include "sys_types.h"
 
 void
 inaddr2str (char abuf[HOSTLEN+1], struct SOCKADDR_IN *sa)
