@@ -5,8 +5,9 @@
  *      Author: Scott
  */
 
-#include "inetlib.h"
+#include "sys_net.h"
 #include "sys_types.h"
+#include "inetlib.h"
 
 void
 inaddr2str (char abuf[HOSTLEN+1], struct SOCKADDR_IN *sa)
