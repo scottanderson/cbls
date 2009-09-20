@@ -16,7 +16,7 @@ struct cbls_conn {
 	void (*rcv)(struct cbls_conn *);
 	struct qbuf in, out;
 	struct qbuf read_in;
-	struct SOCKADDR_IN *sockaddr;
+	struct SOCKADDR_IN sockaddr;
 
 	u_int16_t uid;
 
