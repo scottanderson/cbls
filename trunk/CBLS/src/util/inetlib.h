@@ -9,6 +9,16 @@
 #define INETLIB_H_
 
 #if defined(__WIN32__)
+#  include <winsock.h>
+#elif defined(__DARWIN__)
+#  include <sys/select.h>
+#elif defined(__LINUX__)
+#  include <netinet/in.h>
+#else
+#  error "Unknown platform"
+#endif
+
+#if defined(__WIN32__)
 //FIXME: this should go somewhere else
 typedef unsigned __int8 u_int8_t;
 typedef unsigned __int16 u_int16_t;
