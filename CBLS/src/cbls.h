@@ -1,23 +1,21 @@
 /*
  * cbls.h
  *
- *  Created on: Sep 15, 2009
+ *  Created on: Sep 20, 2009
  *      Author: Scott
  */
 
-#ifndef CBLS_H_INCLUDED
-#define CBLS_H_INCLUDED
+#ifndef CBLS_H_
+#define CBLS_H_
 
-struct qbuf {
-	u_int32_t pos, len;
-	u_int8_t *buf;
-};
+#include "qbuf.h"
 
 struct cbls_conn {
 	struct cbls_conn *next, *prev;
 	int fd;
 	void (*rcv)(struct cbls_conn *);
 	struct qbuf in, out;
+	struct qbuf read_in;
 	struct SOCKADDR_IN *sockaddr;
 
 	u_int16_t uid;
@@ -26,18 +24,7 @@ struct cbls_conn {
 	struct timeval idle_tv;
 };
 
-struct cbls_file {
-	union {
-		void *ptr;
-		struct cbls_conn *cbls;
-	} conn;
-	void (*ready_read)(int fd);
-	void (*ready_write)(int fd);
-};
+struct cbls_conn *cbls_new (void);
+void cbls_accepted (struct cbls_conn *cbls);
 
-extern struct cbls_file *cbls_files;
-
-extern int cbls_open_max;
-extern int nr_open_files;
-
-#endif
+#endif /* CBLS_H_ */
