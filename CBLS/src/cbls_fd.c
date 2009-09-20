@@ -5,11 +5,7 @@
  *      Author: Scott
  */
 
-#if defined(__WIN32__)
-#  include <winsock.h>
-#else
-#  include <netinet/in.h>
-#endif
+#include "util/inetlib.h"
 #include "cbls_fd.h"
 
 int high_fd = 0;

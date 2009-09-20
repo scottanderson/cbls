@@ -11,11 +11,6 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <time.h>
-#if defined(__WIN32__)
-#  include <winsock.h>
-#else
-#  include <netinet/in.h>
-#endif
 #include "util/inetlib.h"
 #include "cbls.h"
 #include "cbls_fd.h"

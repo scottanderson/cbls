@@ -5,11 +5,6 @@
  *      Author: Scott
  */
 
-#if defined(__WIN32__)
-#  include <winsock.h>
-#else
-#  include <netinet/in.h>
-#endif
 #include "inetlib.h"
 
 void
