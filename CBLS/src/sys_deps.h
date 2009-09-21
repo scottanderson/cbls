@@ -11,13 +11,16 @@
 #define S_ISLNK(x) 0
 #include <time.h>
 #include <winsock.h>
-//static __inline__ void
-//gettimeofday (struct timeval *tv, void *xxx __attribute__((__unused__)))
-//{
-//	time_t t = time(0);
-//	tv->tv_sec = t;
-//	tv->tv_usec = 0;
-//}
+#if !defined(__MINGW_H)
+/* MinGW provides gettimeofday */
+static __inline__ void
+gettimeofday (struct timeval *tv, void *xxx __attribute__((__unused__)))
+{
+	time_t t = time(0);
+	tv->tv_sec = t;
+	tv->tv_usec = 0;
+}
+#endif
 #define socket_close(x) closesocket(x)
 #define socket_read(a,b,c) recv(a,b,c,0)
 #define socket_write(a,b,c) send(a,b,c,0)
