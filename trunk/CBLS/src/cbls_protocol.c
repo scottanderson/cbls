@@ -9,6 +9,7 @@
 #include "sys_net.h"
 #include "cbls.h"
 #include "bnls.h"
+#include "cbls_fd.h"
 
 extern void cbls_log (const char *fmt, ...);
 
@@ -56,33 +57,70 @@ decode (struct qbuf *qdst, struct qbuf *qsrc)
 void
 cbls_protocol_rcv(struct cbls_conn *cbls)
 {
-	struct qbuf *in = &cbls->in;
+	struct qbuf *in, *out;
+	struct bnls_hdr *hdr, *oh;
+
+	in = &cbls->in;
+	out = &cbls->out;
 
 	cbls_log("cbls_protocol_recv[%d] qbuf size is %d", cbls->fd, in->pos);
 
-	if(in->pos < SIZEOF_BNLS_HDR) {
-		/* Not enough data to form a header */
-		cbls_log("Not enough data to form a header yet...");
-		return;
+	while(in->pos >= SIZEOF_BNLS_HDR) {
+		hdr = (struct bnls_hdr *)&in->buf[0];
+
+		if(in->pos < hdr->len) {
+			cbls_log("Packet incomplete [%d/%d]", in->pos, hdr->len);
+			break;
+		}
+
+		switch(hdr->id) {
+		case BNLS_AUTHORIZE:
+			cbls_log("[%d] BNLS_AUTHORIZE", cbls->fd);
+			/* (STRING) Bot ID
+			 */
+			if(out->len < SIZEOF_BNLS_HDR + 4)
+				qbuf_set(out, out->pos, SIZEOF_BNLS_HDR + 4);
+			oh = (struct bnls_hdr *)&out->buf[out->pos + out->len];
+			oh->id = BNLS_AUTHORIZE;
+			oh->len += SIZEOF_BNLS_HDR + 4;
+			*(u_int32_t*)&oh->data[0] = 0; // (DWORD) Server code
+			cbls_fd_set(cbls->fd, FDW);
+			break;
+
+		case BNLS_AUTHORIZEPROOF:
+			cbls_log("[%d] BNLS_AUTHORIZEPROOF", cbls->fd);
+			/* (DWORD) Checksum
+			 */
+			if(out->len < SIZEOF_BNLS_HDR + 4)
+				qbuf_set(out, out->pos, SIZEOF_BNLS_HDR + 4);
+			oh = (struct bnls_hdr *)&out->buf[out->pos + out->len];
+			oh->id = BNLS_AUTHORIZEPROOF;
+			oh->len += SIZEOF_BNLS_HDR + 4;
+			*(u_int32_t*)&oh->data[0] = 0; // (DWORD) 0=Authorized, 1=Unauthorized
+			cbls_fd_set(cbls->fd, FDW);
+			break;
+
+		case BNLS_REQUESTVERSIONBYTE:
+			cbls_log("[%d] BNLS_REQUESTVERSIONBYTE", cbls->fd);
+			/* (DWORD) Product ID
+			 */
+			if(out->len < SIZEOF_BNLS_HDR + 8)
+				qbuf_set(out, out->pos, SIZEOF_BNLS_HDR + 8);
+			oh = (struct bnls_hdr *)&out->buf[out->pos + out->len];
+			oh->id = BNLS_REQUESTVERSIONBYTE;
+			oh->len += SIZEOF_BNLS_HDR + 8;
+			*(u_int32_t*)&oh->data[0] = 0; // (DWORD) Product ID (0 for error)
+			*(u_int32_t*)&oh->data[4] = 0; // (DWORD) Version byte
+			cbls_fd_set(cbls->fd, FDW);
+			break;
+
+		default:
+			cbls_log("Recieved unknown packet %d[%d]", hdr->id, hdr->len);
+		}
+
+		// Remove the packet from the buffer
+		if(in->pos != hdr->len)
+			memmove(&in->buf[0], &in->buf[hdr->len], in->pos - hdr->len);
+		in->pos -= hdr->len;
 	}
-
-	struct bnls_hdr *header = (struct bnls_hdr *)in->buf;
-
-	if(in->pos < header->len) {
-		cbls_log("Packet incomplete [%d/%d]", in->pos, header->len);
-		return;
-	}
-
-	switch(header->id) {
-	case BNLS_AUTHORIZE:
-		/* (STRING) Bot ID
-		 */
-		break;
-	default:
-		cbls_log("Recieved unknown packet %d[%d]", header->id, header->len);
-	}
-
-	// Mark the packet read
-	in->pos += header->len;
-	in->len -= header->len;
 }
