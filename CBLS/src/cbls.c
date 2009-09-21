@@ -67,8 +67,8 @@ cbls_close (struct cbls_conn *cbls)
 		cbls->prev->next = cbls->next;
 	if (cbls_tail == cbls)
 		cbls_tail = cbls->prev;
-//	if (cbls->read_in.buf)
-//		xfree(cbls->read_in.buf);
+	if (cbls->read_in.buf)
+		xfree(cbls->read_in.buf);
 	if (cbls->in.buf)
 		xfree(cbls->in.buf);
 	if (cbls->out.buf)
