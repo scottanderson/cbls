@@ -10,7 +10,9 @@
 #include <errno.h>
 #include "sys_net.h"
 #include "sys_types.h"
+#include "sys_deps.h"
 #include "inetlib.h"
+#include "xmalloc.h"
 #include "cbls.h"
 #include "cbls_server.h"
 #include "cbls_fd.h"
@@ -24,7 +26,7 @@ struct timeval server_start_time;
 
 static void loopZ (void) __attribute__((__noreturn__));
 
-struct timeval loopZ_timeval;
+//struct timeval loopZ_timeval;
 
 char *cbls_version = "0.1";
 
@@ -49,7 +51,7 @@ cbls_log (const char *fmt, ...)
 	len += 20;
 	buf[len++] = '\n';
 	write(/*log_fd*/1, buf, len);
-	//SYS_fsync(log_fd);
+	SYS_fsync(/*log_fd*/1);
 }
 
 int
@@ -91,9 +93,9 @@ static void
 loopZ (void)
 {
 	fd_set rfds, wfds;
-	struct timeval /*before,*/ tv;
+	//struct timeval before, tv;
 
-	gettimeofday(&tv, 0);
+	//gettimeofday(&tv, 0);
 	for (;;) {
 		register int n, i;
 
@@ -112,9 +114,9 @@ loopZ (void)
 				exit(1);
 			}
 		}
-		gettimeofday(&tv, 0);
+		/*gettimeofday(&tv, 0);
 		loopZ_timeval = tv;
-		/*if (timer_list) {
+		if (timer_list) {
 			timer_check(&before, &tv);
 		}*/
 		if (n <= 0)
@@ -156,7 +158,7 @@ listen_ready_read (int fd)
 	inaddr2str(abuf, &saddr);
 	if (nr_open_files >= cbls_open_max) {
 		cbls_log("%s:%u: %d >= cbls_open_max (%d)", abuf, ntohs(saddr.sin_port), s, cbls_open_max);
-//		socket_close(s);
+		socket_close(s);
 		nr_open_files--;
 		return;
 	}
