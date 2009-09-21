@@ -26,5 +26,6 @@ struct cbls_conn {
 
 struct cbls_conn *cbls_new (void);
 void cbls_accepted (struct cbls_conn *cbls);
+void cbls_close (struct cbls_conn *cbls);
 
 #endif /* CBLS_H_ */
