@@ -11,6 +11,7 @@
 #include "sys_deps.h"
 #include "sys_net.h"
 #include "xmalloc.h"
+#include "inetlib.h"
 #include "cbls_fd.h"
 #include "cbls_server.h"
 #include "cbls.h"
@@ -19,6 +20,8 @@
 u_int16_t ncbls_conns = 0;
 
 struct cbls_conn __cbls_list, *cbls_list = &__cbls_list, *cbls_tail = &__cbls_list;
+
+extern void cbls_log (const char *fmt, ...);
 
 /*
  * Allocate a new cbls connection and initialize it
@@ -47,8 +50,6 @@ cbls_close (struct cbls_conn *cbls)
 {
 	int fd = cbls->fd;
 	char abuf[HOSTLEN+1];
-	int wr;
-	u_int16_t i;
 
 	socket_close(fd);
 	nr_open_files--;
@@ -66,8 +67,8 @@ cbls_close (struct cbls_conn *cbls)
 		cbls->prev->next = cbls->next;
 	if (cbls_tail == cbls)
 		cbls_tail = cbls->prev;
-	if (cbls->read_in.buf)
-		xfree(cbls->read_in.buf);
+//	if (cbls->read_in.buf)
+//		xfree(cbls->read_in.buf);
 	if (cbls->in.buf)
 		xfree(cbls->in.buf);
 	if (cbls->out.buf)
@@ -77,7 +78,6 @@ cbls_close (struct cbls_conn *cbls)
 }
 
 #define READ_BUFSIZE	1024
-extern unsigned int decode (struct cbls_conn *cbls);
 
 static void
 cbls_read (int fd)
@@ -85,7 +85,6 @@ cbls_read (int fd)
 	ssize_t r;
 	struct cbls_conn *cbls = cbls_files[fd].conn.cbls;
 	struct qbuf *in = &cbls->read_in;
-	int do_reset;
 	int err;
 
 	if (in->len == 0) {
@@ -106,24 +105,18 @@ cbls_read (int fd)
 	} else {
 		in->len += r;
 		for (;;) {
-			r = decode(cbls);
+			r = decode(&cbls->in, &cbls->read_in);
 			if (!r)
 				break;
 			if (cbls->rcv) {
-				do_reset = proto_should_reset(cbls);
 				cbls->rcv(cbls);
 				/* cbls->rcv could have called cbls_close */
 				if (!cbls_files[fd].conn.cbls)
 					return;
-				if (do_reset)
-					goto reset;
 			} else {
-reset:
-				/* Check idle status after a transaction is completed */
-//				if (!cbls->access_extra.can_login) {
-//					test_away(cbls);
-//				}
-				proto_reset(cbls);
+				cbls_log("cbls->recv was null [%d]", fd, strerror(errno));
+				cbls_close(cbls);
+				return;
 			}
 		}
 	}
