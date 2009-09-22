@@ -8,6 +8,7 @@
 #ifndef CBLS_H_
 #define CBLS_H_
 
+#include <sys/time.h>
 #include "qbuf.h"
 
 struct cbls_conn {

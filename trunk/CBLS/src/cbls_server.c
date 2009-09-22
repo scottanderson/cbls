@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <sys/time.h>
 #include <errno.h>
 #include "sys_net.h"
@@ -16,6 +17,12 @@
 #include "cbls.h"
 #include "cbls_server.h"
 #include "cbls_fd.h"
+
+#if defined(__APPLE__)
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#endif
 
 int cbls_open_max = 0;
 struct cbls_file *cbls_files = 0;
