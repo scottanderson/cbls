@@ -54,14 +54,64 @@ decode (struct qbuf *qdst, struct qbuf *qsrc)
 	return (qdst->len == 0) ? 1 : 0;
 }
 
+struct packet_writer {
+	struct cbls_conn *cbls;
+	struct bnls_hdr *oh;
+	int qbuf_offset;
+};
+
+void
+write_init(struct packet_writer *pw, struct cbls_conn *cbls, int packetid, int min_length) {
+	struct bnls_hdr *oh;
+	struct qbuf *out;
+
+	cbls_log("[%d] WRITE 0x%x", cbls->fd, packetid);
+
+	out = &cbls->out;
+
+	pw->qbuf_offset = out->len;
+	qbuf_set(out, out->pos, pw->qbuf_offset + SIZEOF_BNLS_HDR + min_length);
+	oh = (struct bnls_hdr *)&out->buf[out->pos + pw->qbuf_offset];
+	oh->id = packetid;
+	oh->len = SIZEOF_BNLS_HDR;
+
+	pw->cbls = cbls;
+	pw->oh = oh;
+}
+
+void
+write_raw(struct packet_writer *pw, void *data, int len) {
+	struct qbuf *out = &pw->cbls->out;
+    struct bnls_hdr *oh = pw->oh;
+
+    int write_pos = oh->len;
+    oh->len += len;
+    if(out->len < pw->qbuf_offset + oh->len)
+        qbuf_set(out, out->pos, pw->qbuf_offset + oh->len);
+    memcpy(&oh->data[write_pos], data, len);
+}
+
+void
+write_dword(struct packet_writer *pw, u_int32_t value) {
+	write_raw(pw, &value, 4);
+}
+
+void
+write_end(struct packet_writer *pw) {
+	struct bnls_hdr *oh = pw->oh;
+	cbls_fd_set(pw->cbls->fd, FDW);
+
+	/*packet_log("SEND", oh);*/
+}
+
 void
 cbls_protocol_rcv(struct cbls_conn *cbls)
 {
-	struct qbuf *in, *out;
-	struct bnls_hdr *hdr, *oh;
+	struct qbuf *in;
+	struct bnls_hdr *hdr;
+	struct packet_writer pw;
 
 	in = &cbls->in;
-	out = &cbls->out;
 
 	cbls_log("cbls_protocol_recv[%d] qbuf size is %d", cbls->fd, in->pos);
 
@@ -73,49 +123,39 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			break;
 		}
 
+		/*packet_log("RECV", hdr);*/
+
 		switch(hdr->id) {
 		case BNLS_AUTHORIZE:
 			cbls_log("[%d] BNLS_AUTHORIZE", cbls->fd);
 			/* (STRING) Bot ID
 			 */
-			if(out->len < SIZEOF_BNLS_HDR + 4)
-				qbuf_set(out, out->pos, SIZEOF_BNLS_HDR + 4);
-			oh = (struct bnls_hdr *)&out->buf[out->pos + out->len];
-			oh->id = BNLS_AUTHORIZE;
-			oh->len += SIZEOF_BNLS_HDR + 4;
-			*(u_int32_t*)&oh->data[0] = 0; // (DWORD) Server code
-			cbls_fd_set(cbls->fd, FDW);
+			write_init(&pw, cbls, BNLS_AUTHORIZE, 4);
+			write_dword(&pw, 0); // (DWORD) Server code
+			write_end(&pw);
 			break;
 
 		case BNLS_AUTHORIZEPROOF:
 			cbls_log("[%d] BNLS_AUTHORIZEPROOF", cbls->fd);
 			/* (DWORD) Checksum
 			 */
-			if(out->len < SIZEOF_BNLS_HDR + 4)
-				qbuf_set(out, out->pos, SIZEOF_BNLS_HDR + 4);
-			oh = (struct bnls_hdr *)&out->buf[out->pos + out->len];
-			oh->id = BNLS_AUTHORIZEPROOF;
-			oh->len += SIZEOF_BNLS_HDR + 4;
-			*(u_int32_t*)&oh->data[0] = 0; // (DWORD) 0=Authorized, 1=Unauthorized
-			cbls_fd_set(cbls->fd, FDW);
+			write_init(&pw, cbls, BNLS_AUTHORIZEPROOF, 4);
+			write_dword(&pw, 0); // (DWORD) 0=Authorized, 1=Unauthorized
+			write_end(&pw);
 			break;
 
 		case BNLS_REQUESTVERSIONBYTE:
 			cbls_log("[%d] BNLS_REQUESTVERSIONBYTE", cbls->fd);
 			/* (DWORD) Product ID
 			 */
-			if(out->len < SIZEOF_BNLS_HDR + 8)
-				qbuf_set(out, out->pos, SIZEOF_BNLS_HDR + 8);
-			oh = (struct bnls_hdr *)&out->buf[out->pos + out->len];
-			oh->id = BNLS_REQUESTVERSIONBYTE;
-			oh->len += SIZEOF_BNLS_HDR + 8;
-			*(u_int32_t*)&oh->data[0] = 0; // (DWORD) Product ID (0 for error)
-			*(u_int32_t*)&oh->data[4] = 0; // (DWORD) Version byte
-			cbls_fd_set(cbls->fd, FDW);
+			write_init(&pw, cbls, BNLS_REQUESTVERSIONBYTE, 8);
+			write_dword(&pw, 0); // (DWORD) Product ID (0 for error)
+			write_dword(&pw, 0); // (DWORD) Version byte
+			write_end(&pw);
 			break;
 
 		default:
-			cbls_log("Recieved unknown packet %d[%d]", hdr->id, hdr->len);
+			cbls_log("Received unknown packet %d[%d]", hdr->id, hdr->len);
 		}
 
 		// Remove the packet from the buffer
