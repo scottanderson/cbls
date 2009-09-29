@@ -171,8 +171,10 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			break; }
 
 		default:
-			cbls_log("Received unknown packet %d[%d]", hdr->id, hdr->len);
-			packet_log("RECV", hdr);
+			// Received unknown packet
+			packet_log("RECV unknown packet", hdr);
+			cbls_close(cbls);
+			return;
 		}
 
 		// Remove the packet from the buffer
