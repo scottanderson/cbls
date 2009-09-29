@@ -60,6 +60,9 @@ struct packet_writer {
 	int qbuf_offset;
 };
 
+/**
+ * Initialize a packet writer. The length is just a hint; you may go over.
+ */
 void
 write_init(struct packet_writer *pw, struct cbls_conn *cbls, int packetid, int min_length) {
 	struct bnls_hdr *oh;
@@ -98,10 +101,9 @@ write_dword(struct packet_writer *pw, u_int32_t value) {
 
 void
 write_end(struct packet_writer *pw) {
-	struct bnls_hdr *oh = pw->oh;
 	cbls_fd_set(pw->cbls->fd, FDW);
 
-	/*packet_log("SEND", oh);*/
+	/*packet_log("SEND", pw->oh);*/
 }
 
 void
@@ -126,6 +128,10 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 		/*packet_log("RECV", hdr);*/
 
 		switch(hdr->id) {
+		case BNLS_NULL:
+			cbls_log("[%d] BNLS_NULL", cbls->fd);
+			break;
+			
 		case BNLS_AUTHORIZE:
 			cbls_log("[%d] BNLS_AUTHORIZE", cbls->fd);
 			/* (STRING) Bot ID
