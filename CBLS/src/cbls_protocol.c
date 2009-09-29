@@ -10,6 +10,7 @@
 #include "cbls.h"
 #include "bnls.h"
 #include "cbls_fd.h"
+#include "debug.h"
 
 extern void cbls_log (const char *fmt, ...);
 
@@ -68,8 +69,6 @@ write_init(struct packet_writer *pw, struct cbls_conn *cbls, int packetid, int m
 	struct bnls_hdr *oh;
 	struct qbuf *out;
 
-	cbls_log("[%d] WRITE 0x%x", cbls->fd, packetid);
-
 	out = &cbls->out;
 
 	pw->qbuf_offset = out->len;
@@ -87,7 +86,7 @@ write_raw(struct packet_writer *pw, void *data, int len) {
 	struct qbuf *out = &pw->cbls->out;
     struct bnls_hdr *oh = pw->oh;
 
-    int write_pos = oh->len;
+    int write_pos = oh->len - SIZEOF_BNLS_HDR;
     oh->len += len;
     if(out->len < pw->qbuf_offset + oh->len)
         qbuf_set(out, out->pos, pw->qbuf_offset + oh->len);
@@ -115,25 +114,21 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 
 	in = &cbls->in;
 
-	cbls_log("cbls_protocol_recv[%d] qbuf size is %d", cbls->fd, in->pos);
+	/*cbls_log("cbls_protocol_recv[%d] qbuf size is %d", cbls->fd, in->pos);*/
 
 	while(in->pos >= SIZEOF_BNLS_HDR) {
 		hdr = (struct bnls_hdr *)&in->buf[0];
 
 		if(in->pos < hdr->len) {
-			cbls_log("Packet incomplete [%d/%d]", in->pos, hdr->len);
+			/*cbls_log("Packet incomplete [%d/%d]", in->pos, hdr->len);*/
 			break;
 		}
 
-		/*packet_log("RECV", hdr);*/
-
 		switch(hdr->id) {
 		case BNLS_NULL:
-			cbls_log("[%d] BNLS_NULL", cbls->fd);
 			break;
 			
 		case BNLS_AUTHORIZE:
-			cbls_log("[%d] BNLS_AUTHORIZE", cbls->fd);
 			/* (STRING) Bot ID
 			 */
 			write_init(&pw, cbls, BNLS_AUTHORIZE, 4);
@@ -142,7 +137,6 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			break;
 
 		case BNLS_AUTHORIZEPROOF:
-			cbls_log("[%d] BNLS_AUTHORIZEPROOF", cbls->fd);
 			/* (DWORD) Checksum
 			 */
 			write_init(&pw, cbls, BNLS_AUTHORIZEPROOF, 4);
@@ -150,18 +144,35 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			write_end(&pw);
 			break;
 
-		case BNLS_REQUESTVERSIONBYTE:
-			cbls_log("[%d] BNLS_REQUESTVERSIONBYTE", cbls->fd);
+		case BNLS_REQUESTVERSIONBYTE: {
 			/* (DWORD) Product ID
 			 */
+			u_int32_t prod = *(u_int32_t*)&hdr->data[0];
+			u_int32_t verb;
+			if(hdr->len < 4)
+				prod = 0;
+			switch(prod) {
+			case 1: case 2:  verb = 0xd3; break;
+			case 3:          verb = 0x4f; break;
+			case 4: case 5:  verb = 0x0c; break;
+			case 6:          verb = 0xa9; break;
+			case 7: case 8:  verb = 0x17; break;
+			case 9: case 10: verb = 0x2a; break;
+			case 11:         verb = 0x1a; break;
+			default:
+				prod = 0;
+				verb = 0;
+			}
+
 			write_init(&pw, cbls, BNLS_REQUESTVERSIONBYTE, 8);
-			write_dword(&pw, 0); // (DWORD) Product ID (0 for error)
-			write_dword(&pw, 0); // (DWORD) Version byte
+			write_dword(&pw, prod); // (DWORD) Product ID (0 for error)
+			write_dword(&pw, verb); // (DWORD) Version byte
 			write_end(&pw);
-			break;
+			break; }
 
 		default:
 			cbls_log("Received unknown packet %d[%d]", hdr->id, hdr->len);
+			packet_log("RECV", hdr);
 		}
 
 		// Remove the packet from the buffer
