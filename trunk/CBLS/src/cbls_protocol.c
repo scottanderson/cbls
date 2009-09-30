@@ -84,20 +84,27 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (DWORD)  Session key from Battle.net
 			 * (STRING) CD-Key, no dashes or spaces
 			 */
-			u_int32_t sess;
-			u_int32_t client_token = (u_int32_t)rand();
-
-			if (!read_dword(&pr, &sess)) {
+			u_int32_t session_key;
+			char *cdkey;
+			if(!read_dword(&pr, &session_key)
+			|| !(cdkey = read_string(&pr))) {
 				cbls_close(cbls);
 				return;
 			}
+
+			int i;
 
 			/**
 			 * (BOOLEAN)  Result
 			 * (DWORD)    Client Token
 			 * (DWORD[9]) CD key data for SID_AUTH_CHECK
 			 */
-
+			write_init(&pw, cbls, BNLS_CDKEY, 4);
+			write_dword(&pw, 0); // fail
+			write_dword(&pw, 0);
+			for(i = 0; i < 9; i++)
+				write_dword(&pw, 0);
+			write_end(&pw);
 			break;
 		}
 
@@ -323,6 +330,7 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 				prod = 0;
 			}
 
+			// FIXME: don't hard-code version bytes
 			u_int32_t verb;
 			switch(prod) {
 			case 1: case 2:  verb = 0xd3; break;
@@ -334,7 +342,6 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			case 11:         verb = 0x1a; break;
 			default:
 				prod = 0;
-				verb = 0;
 			}
 
 			/**
