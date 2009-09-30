@@ -23,6 +23,8 @@ struct cbls_conn {
 
 	struct timeval login_tv;
 	struct timeval idle_tv;
+
+	u_int32_t nls_rev;
 };
 
 struct cbls_conn *cbls_new (void);
