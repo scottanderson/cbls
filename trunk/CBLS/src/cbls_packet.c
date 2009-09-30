@@ -20,7 +20,7 @@ void
 read_init(struct packet_reader *pr, struct cbls_conn *cbls) {
 	pr->cbls = cbls;
 	pr->ih = (void *)&cbls->in.buf[0];
-	pr->pos = SIZEOF_BNLS_HDR;
+	pr->pos = 0;
 }
 
 int
@@ -60,7 +60,7 @@ int
 read_raw(struct packet_reader *pr, void *dest, int len) {
 	struct bnls_hdr *hdr = pr->ih;
 
-	if(hdr->len < pr->pos + len)
+	if(hdr->len < SIZEOF_BNLS_HDR + pr->pos + len)
 		return 0;
 
 	memcpy(dest, &hdr->data[pr->pos], len);
@@ -89,7 +89,21 @@ read_qword(struct packet_reader *pr, u_int64_t *dest) {
 
 char*
 read_string(struct packet_reader *pr) {
-	// TODO: implement
+	struct bnls_hdr *hdr = pr->ih;
+	int endpos;
+
+	// Validate that the buffer holds a null-terminated string
+	for(endpos = pr->pos; endpos < hdr->len - SIZEOF_BNLS_HDR; endpos++) {
+		if(hdr->data[endpos] == 0) {
+			// We found the null terminator
+			char *ret = &hdr->data[pr->pos];
+			// Move the buffer position to after the null
+			pr->pos = endpos + 1;
+			return ret;
+		}
+	}
+
+	// Couldn't validate the data
 	return 0;
 }
 
