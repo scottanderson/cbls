@@ -2,11 +2,24 @@
  * cbls_packet.h
  *
  *  Created on: Sep 30, 2009
- *      Author: sanderson
+ *      Author: Scott
  */
 
 #ifndef CBLS_PACKET_H_
 #define CBLS_PACKET_H_
+
+struct packet_reader {
+	struct cbls_conn *cbls;
+	struct bnls_hdr *ih;
+	int pos;
+};
+
+void read_init(struct packet_reader *pr, struct cbls_conn *cbls);
+int  read_valid(struct packet_reader *pr);
+int  read_ready(struct packet_reader *pr);
+int  read_raw(struct packet_reader *pr, void *dest, int len);
+int  read_dword(struct packet_reader *pr, u_int32_t *dest);
+void read_end(struct packet_reader *pr);
 
 struct packet_writer {
 	struct cbls_conn *cbls;

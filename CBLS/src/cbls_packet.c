@@ -2,7 +2,7 @@
  * cbls_packet.c
  *
  *  Created on: Sep 30, 2009
- *      Author: sanderson
+ *      Author: Scott
  */
 
 #include <string.h>
@@ -13,6 +13,74 @@
 #include "bnls.h"
 #include "cbls_fd.h"
 //#include "debug.h" /* for packet_log() */
+
+extern void cbls_log (const char *fmt, ...);
+
+void
+read_init(struct packet_reader *pr, struct cbls_conn *cbls) {
+	pr->cbls = cbls;
+	pr->ih = (void *)&cbls->in.buf[0];
+	pr->pos = SIZEOF_BNLS_HDR;
+}
+
+int
+read_valid(struct packet_reader *pr) {
+	struct bnls_hdr *hdr = pr->ih;
+
+	if(hdr->id > BNLS_VERSIONCHECKEX2) {
+		cbls_log("Invalid packet id 0x%X", hdr->id);
+		return 0;
+	}
+
+	if(hdr->len > 0xFF) {
+		cbls_log("Invalid packet len 0x%X", hdr->len);
+		return 0;
+	}
+
+	// Packet is valid
+	return 1;
+}
+
+
+int
+read_ready(struct packet_reader *pr) {
+	struct qbuf *in = &pr->cbls->in;
+	struct bnls_hdr *hdr = pr->ih;
+
+	if(in->pos < hdr->len) {
+		/*cbls_log("Packet incomplete [%d/%d]", in->pos, hdr->len);*/
+		return 0;
+	}
+
+	// Packet is completely recieved
+	return 1;
+}
+
+int
+read_raw(struct packet_reader *pr, void *dest, int len) {
+	struct bnls_hdr *hdr = pr->ih;
+
+	if(hdr->len < pr->pos + len)
+		return 0;
+
+	memcpy(dest, &hdr->data[pr->pos], len);
+	return 1;
+}
+
+int
+read_dword(struct packet_reader *pr, u_int32_t *dest) {
+	return read_raw(pr, dest, 4);
+}
+
+void
+read_end(struct packet_reader *pr) {
+	struct qbuf *in = &pr->cbls->in;
+	struct bnls_hdr *hdr = pr->ih;
+
+	if(in->pos != hdr->len)
+		memmove(&in->buf[0], &in->buf[hdr->len], in->pos - hdr->len);
+	in->pos -= hdr->len;
+}
 
 /**
  * Initialize a packet writer. The length is just a hint; you may go over.
@@ -37,13 +105,13 @@ write_init(struct packet_writer *pw, struct cbls_conn *cbls, int packetid, int m
 void
 write_raw(struct packet_writer *pw, void *data, int len) {
 	struct qbuf *out = &pw->cbls->out;
-    struct bnls_hdr *oh = pw->oh;
+	struct bnls_hdr *oh = pw->oh;
 
-    int write_pos = oh->len - SIZEOF_BNLS_HDR;
-    oh->len += len;
-    if(out->len < pw->qbuf_offset + oh->len)
-        qbuf_set(out, out->pos, pw->qbuf_offset + oh->len);
-    memcpy(&oh->data[write_pos], data, len);
+	int write_pos = oh->len - SIZEOF_BNLS_HDR;
+	oh->len += len;
+	if(out->len < pw->qbuf_offset + oh->len)
+		qbuf_set(out, out->pos, pw->qbuf_offset + oh->len);
+	memcpy(&oh->data[write_pos], data, len);
 }
 
 void
