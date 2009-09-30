@@ -54,5 +54,6 @@ struct bnls_hdr {
 #define BNLS_SERVERLOGONPROOF		((u_int8_t) 0x14)
 #define BNLS_VERSIONCHECKEX			((u_int8_t) 0x18)
 #define BNLS_VERSIONCHECKEX2		((u_int8_t) 0x1A)
+#define BNLS_WARDEN					((u_int8_t) 0x7D)
 
 #endif /* BNLS_H_ */
