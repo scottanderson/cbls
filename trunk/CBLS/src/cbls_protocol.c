@@ -147,51 +147,51 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			/* (DWORD) 		Session key from Battle.net. This is the second DWORD in SID_AUTH_INFO (0x50)
 			 * (STRING)		CD-Key. No dashes or spaces.
 			 */
-
+			break;
 		case BNLS_LOGONCHALLENGE:
 			/* (STRING) 	Account Name
 			 * (STRING) 	Password
 			 */
-
+			break;
 		case BNLS_LOGONPROOF:
 			/* (16 DWORDs) 	Data for SID_AUTH_ACCOUNTLOGON (0x53)
 			 */
-
+			break;
 		case BNLS_CREATEACCOUNT:
 			/* (STRING) 	Account Name
 			 * (STRING) 	Password
 			 */
-
+			break;
 		case BNLS_CHANGECHALLENGE:
 			/* (STRING) 	Account Name
 			 * (STRING) 	Account's Old Password
 			 * (STRING) 	Account's New Password
 			 */
-
+			break;
 		case BNLS_CHANGEPROOF:
 			/* (16 DWORDs) Data from SID_AUTH_ACCOUNTCHANGE (0x55)
 			 */
-
+			break;
 		case BNLS_UPGRADECHALLENGE:
 			/* (STRING) 	Account Name
 			 * (STRING) 	Account's Old Password
 			 * (STRING) 	Account's New Password (May be identical to old password, but still must be provided.)
 			 */
-
+			break;
 		case BNLS_UPGRADEPROOF:
 			/* (22 DWORDs) 	Data for SID_AUTH_ACCOUNTUPGRADEPROOF (0x58)
 			 */
-
+			break;
 		case BNLS_VERSIONCHECK:
 			/* (DWORD) 		Product ID
 			 * (DWORD) 		Version DLL digit in the range 0-7 (For example, for IX86Ver1.mpq, the digit is 1)
 			 * (STRING) 	Checksum Formula
 			 */
-
+			break;
 		case BNLS_CONFIRMLOGON:
 			/* (5 DWORDs) Password proof from Battle.net
 			 */
-
+			break;
 		case BNLS_HASHDATA:
 			/* (DWORD) 		The size of the data to be hashed. Note: This is no longer restricted to 64 bytes.
 			 * (DWORD) 		Flags
@@ -201,7 +201,7 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (DWORD)		Server key. Present only if HASHDATA_FLAG_DOUBLEHASH (0x02) is specified.
 			 * (DWORD)		Cookie. Present only if HASHDATA_FLAG_COOKIE (0x04) is specified.
 			 */
-
+			break;
 		case BNLS_CDKEY_EX:
 			/* (DWORD) 				Cookie. This value has no special meaning to the server and will simply be echoed to the client in the response.
 			 * (BYTE)				Amount of CD-keys to encrypt. Must be between 1 and 32.
@@ -210,11 +210,13 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (OPTIONAL DWORD(s)) 	Client session key(s), depending on the flags.
 			 * (STRING(s))			CD-keys. No dashes or spaces. The client can use multiple types of CD-keys in the same packet.
 			 */
-
-		case BNLS_CHOOSENLSREVISION:
+			break;
+		case BNLS_CHOOSENLSREVISION: {
 			/* (DWORD)		NLS Revision Number
 			 */
-
+			u_int32_t nls_rev = *(u_int32_t*)&hdr->data[0];
+			break;
+		}
 		case BNLS_AUTHORIZE:
 			/* (STRING) Bot ID
 			 */
@@ -261,25 +263,25 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			/* (DWORD) 		Server's IP
 			 * (128 bytes) 	Signature
 			 */
-
+			break;
 		case BNLS_RESERVESERVERSLOTS:
 			/* (DWORD) 		Number of slots to reserve
 			 * BNLS may limit the number of slots to a reasonable value.
 			 */
-
+			break;
 		case BNLS_SERVERLOGONCHALLENGE:
 			/* (DWORD) 		Slot Index
 			 * (DWORD)		NLS Revision Number
 			 * (16 DWORDs)	Data from Account Database
 			 * (8 DWORDs)	Data from the client's SID_AUTH_ACCOUNTLOGON (0x53) request
 			 */
-
+			break;
 		case BNLS_SERVERLOGONPROOF:
 			/* (DWORD) 		Slot Index
 			 * (5 DWORDs)	Data from the clien't SID_AUTH_ACCOUNTLOGONPROOF (0x54) request
 			 * (STRING)		The client's Account Name
 			 */
-
+			break;
 		case BNLS_VERSIONCHECKEX:
 			/* (DWORD)		Product ID
 			 * (DWORD)		Version DLL digit in the range 0-7 (For example, for IX86Ver1.mpq, the digit is 1)
@@ -287,7 +289,7 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (DWORD)		Cookie
 			 * (STRING)		Checksum Formula
 			 */
-
+			break;
 		case BNLS_VERSIONCHECKEX2:
 			/* (DWORD)		Product ID
 			 * (DWORD)		Flags (must be set to 0 or you will be disconnected!)
@@ -296,7 +298,7 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (STRING)		Version Check Archive Filename
 			 * (STRING)		Checksum Formula
 			 */
-
+			break;
 		default:
 			// Received unknown packet
 			packet_log("RECV unknown packet", hdr);
