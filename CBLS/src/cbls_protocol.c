@@ -15,6 +15,8 @@
 
 extern void cbls_log (const char *fmt, ...);
 
+int m_nlsrevision; //Stored NLS Revision Number
+
 // cbls->read_in has new data off the wire; copy data to cbls->in
 u_int32_t
 decode (struct qbuf *qdst, struct qbuf *qsrc)
@@ -98,54 +100,64 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (STRING)		CD-Key. No dashes or spaces.
 			 */
 			break;
+
 		case BNLS_LOGONCHALLENGE:
 			/* (STRING) 	Account Name
 			 * (STRING) 	Password
 			 */
 			break;
+
 		case BNLS_LOGONPROOF:
 			/* (16 DWORDs) 	Data for SID_AUTH_ACCOUNTLOGON (0x53)
 			 */
 			break;
+
 		case BNLS_CREATEACCOUNT:
 			/* (STRING) 	Account Name
 			 * (STRING) 	Password
 			 */
 			break;
+
 		case BNLS_CHANGECHALLENGE:
 			/* (STRING) 	Account Name
 			 * (STRING) 	Account's Old Password
 			 * (STRING) 	Account's New Password
 			 */
 			break;
+
 		case BNLS_CHANGEPROOF:
 			/* (16 DWORDs) Data from SID_AUTH_ACCOUNTCHANGE (0x55)
 			 */
 			break;
+
 		case BNLS_UPGRADECHALLENGE:
 			/* (STRING) 	Account Name
 			 * (STRING) 	Account's Old Password
 			 * (STRING) 	Account's New Password (May be identical to old password, but still must be provided.)
 			 */
 			break;
+
 		case BNLS_UPGRADEPROOF:
 			/* (22 DWORDs) 	Data for SID_AUTH_ACCOUNTUPGRADEPROOF (0x58)
 			 */
 			break;
+
 		case BNLS_VERSIONCHECK:
 			/* (DWORD) 		Product ID
 			 * (DWORD) 		Version DLL digit in the range 0-7 (For example, for IX86Ver1.mpq, the digit is 1)
 			 * (STRING) 	Checksum Formula
 			 */
 			break;
+
 		case BNLS_CONFIRMLOGON:
 			/* (5 DWORDs) Password proof from Battle.net
 			 */
 			break;
+
 		case BNLS_HASHDATA:
 			/* (DWORD) 		The size of the data to be hashed. Note: This is no longer restricted to 64 bytes.
 			 * (DWORD) 		Flags
-			 * (VARIANT)	Data to be hashed.
+			 * (VOID)		Data to be hashed.
 			 * Optional Data:
 			 * (DWORD)		Client key. Present only if HASHDATA_FLAG_DOUBLEHASH (0x02) is specified.
 			 * (DWORD)		Server key. Present only if HASHDATA_FLAG_DOUBLEHASH (0x02) is specified.
@@ -161,12 +173,27 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (STRING(s))			CD-keys. No dashes or spaces. The client can use multiple types of CD-keys in the same packet.
 			 */
 			break;
+
 		case BNLS_CHOOSENLSREVISION: {
 			/* (DWORD)		NLS Revision Number
 			 */
-			u_int32_t nls_rev = *(u_int32_t*)&hdr->data[0];
+			m_nlsrevision = *(u_int32_t*)&hdr->data[0];
+			if (m_nlsrevision < 0 || m_nlsrevision > 2)
+			{
+				//Unsuccessful, unknown NLS Type
+				write_init(&pw, cbls, BNLS_CHOOSENLSREVISION, 4);
+				write_dword(&pw, 0);
+				write_end(&pw);
+				m_nlsrevision = 1;
+			} else {
+				//Successful
+				write_init(&pw, cbls, BNLS_CHOOSENLSREVISION, 4);
+				write_dword(&pw, 1);
+				write_end(&pw);
+			}
 			break;
 		}
+
 		case BNLS_AUTHORIZE:
 			/* (STRING) Bot ID
 			 */
@@ -214,11 +241,13 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (128 bytes) 	Signature
 			 */
 			break;
+
 		case BNLS_RESERVESERVERSLOTS:
 			/* (DWORD) 		Number of slots to reserve
 			 * BNLS may limit the number of slots to a reasonable value.
 			 */
 			break;
+
 		case BNLS_SERVERLOGONCHALLENGE:
 			/* (DWORD) 		Slot Index
 			 * (DWORD)		NLS Revision Number
@@ -226,12 +255,14 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (8 DWORDs)	Data from the client's SID_AUTH_ACCOUNTLOGON (0x53) request
 			 */
 			break;
+
 		case BNLS_SERVERLOGONPROOF:
 			/* (DWORD) 		Slot Index
 			 * (5 DWORDs)	Data from the clien't SID_AUTH_ACCOUNTLOGONPROOF (0x54) request
 			 * (STRING)		The client's Account Name
 			 */
 			break;
+
 		case BNLS_VERSIONCHECKEX:
 			/* (DWORD)		Product ID
 			 * (DWORD)		Version DLL digit in the range 0-7 (For example, for IX86Ver1.mpq, the digit is 1)
@@ -240,6 +271,7 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (STRING)		Checksum Formula
 			 */
 			break;
+
 		case BNLS_VERSIONCHECKEX2:
 			/* (DWORD)		Product ID
 			 * (DWORD)		Flags (must be set to 0 or you will be disconnected!)
@@ -249,6 +281,23 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (STRING)		Checksum Formula
 			 */
 			break;
+
+		case BNLS_WARDEN:
+			/* (BYTE)		Usage
+			 * (DWORD)		Cookie
+			 * Usage 0x00
+			 * (DWORD)		Client
+			 * (WORD)		Length of Seed (should be 4 always)
+			 * (VOID)		Seed
+			 * (STRING)		Username
+			 * (WORD)		Length of password
+			 * (VOID)		Password
+			 * Usage 0x01
+			 * (WORD)		Length of Warden Packet
+			 * (VOID)		Warden Packet Data
+			 */
+			break;
+
 		default:
 			// Received unknown packet
 			packet_log("RECV unknown packet", hdr);
