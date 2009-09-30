@@ -75,91 +75,185 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 
 		switch(pr.ih->id) {
 		case BNLS_NULL:
-			/* No response from the server from this message. Simply a keep-alive.
-			 */
+			// keep-alive
 			break;
 			
-		case BNLS_CDKEY:
-			/* (DWORD) 		Session key from Battle.net. This is the second DWORD in SID_AUTH_INFO (0x50)
-			 * (STRING)		CD-Key. No dashes or spaces.
+		case BNLS_CDKEY: {
+			/**
+			 * (DWORD)  Session key from Battle.net
+			 * (STRING) CD-Key, no dashes or spaces
+			 */
+
+			/**
+			 * (BOOLEAN)  Result
+			 * (DWORD)    Client Token
+			 * (DWORD[9]) CD key data for SID_AUTH_CHECK
 			 */
 			break;
+		}
 
-		case BNLS_LOGONCHALLENGE:
-			/* (STRING) 	Account Name
-			 * (STRING) 	Password
+		case BNLS_LOGONCHALLENGE: {
+			/**
+			 * (STRING) Account Name
+			 * (STRING) Password
+			 */
+
+			/**
+			 * (DWORD[8]) Data for SID_AUTH_ACCOUNTLOGON
 			 */
 			break;
+		}
 
-		case BNLS_LOGONPROOF:
-			/* (16 DWORDs) 	Data for SID_AUTH_ACCOUNTLOGON (0x53)
+		case BNLS_LOGONPROOF: {
+			/**
+			 * (DWORD[16]) Data from SID_AUTH_ACCOUNTLOGON
+			 */
+
+			/**
+			 * (DWORD[5]) Data for SID_AUTH_ACCOUNTLOGONPROOF
 			 */
 			break;
+		}
 
-		case BNLS_CREATEACCOUNT:
-			/* (STRING) 	Account Name
-			 * (STRING) 	Password
+		case BNLS_CREATEACCOUNT: {
+			/**
+			 * (STRING) Account Name
+			 * (STRING) Password
+			 */
+
+			/**
+			 * (DWORD[16]) Data for SID_AUTH_ACCOUNTCREATE
 			 */
 			break;
+		}
 
-		case BNLS_CHANGECHALLENGE:
-			/* (STRING) 	Account Name
-			 * (STRING) 	Account's Old Password
-			 * (STRING) 	Account's New Password
+		case BNLS_CHANGECHALLENGE: {
+			/**
+			 * (STRING) Account Name
+			 * (STRING) Account's Old Password
+			 * (STRING) Account's New Password
+			 */
+
+			/**
+			 * (DWORD[8]) Data for SID_AUTH_ACCOUNTCHANGE
 			 */
 			break;
+		}
 
-		case BNLS_CHANGEPROOF:
-			/* (16 DWORDs) Data from SID_AUTH_ACCOUNTCHANGE (0x55)
+		case BNLS_CHANGEPROOF: {
+			/**
+			 * (DWORD[16]) Data from SID_AUTH_ACCOUNTCHANGE
+			 */
+
+			/**
+			 * (DWORD[21]) Data for SID_AUTH_ACCOUNTCHANGEPROOF
 			 */
 			break;
+		}
 
-		case BNLS_UPGRADECHALLENGE:
-			/* (STRING) 	Account Name
-			 * (STRING) 	Account's Old Password
-			 * (STRING) 	Account's New Password (May be identical to old password, but still must be provided.)
+		case BNLS_UPGRADECHALLENGE: {
+			/**
+			 * (STRING) Account Name
+			 * (STRING) Account's Old Password
+			 * (STRING) Account's New Password (May be identical to old password, but still must be provided.)
+			 */
+
+			/**
+			 * (BOOLEAN) Success code
 			 */
 			break;
+		}
 
-		case BNLS_UPGRADEPROOF:
-			/* (22 DWORDs) 	Data for SID_AUTH_ACCOUNTUPGRADEPROOF (0x58)
+		case BNLS_UPGRADEPROOF: {
+			/**
+			 * (DWORD)    Client Token
+			 * (DWORD[5]) Old Password Hash
+			 * (DWORD[8]) New Password Salt
+			 * (DWORD[8]) New Password Verifier
+			 */
+
+			/**
+			 * (DWORD[22]) Data for SID_AUTH_ACCOUNTUPGRADEPROOF
 			 */
 			break;
+		}
 
-		case BNLS_VERSIONCHECK:
-			/* (DWORD) 		Product ID
-			 * (DWORD) 		Version DLL digit in the range 0-7 (For example, for IX86Ver1.mpq, the digit is 1)
-			 * (STRING) 	Checksum Formula
+		case BNLS_VERSIONCHECK: {
+			/**
+			 * (DWORD)  Product ID
+			 * (DWORD)  Version DLL digit in the range 0-7 (For example, for IX86Ver1.mpq, the digit is 1)
+			 * (STRING) Checksum Formula
+			 */
+
+			/**
+			 * (BOOLEAN) Success
+			 *
+			 * If Success is TRUE:
+			 * (DWORD)   Version
+			 * (DWORD)   Checksum
+			 * (STRING)  Version check stat string
 			 */
 			break;
+		}
 
-		case BNLS_CONFIRMLOGON:
-			/* (5 DWORDs) Password proof from Battle.net
+		case BNLS_CONFIRMLOGON: {
+			/**
+			 * (DWORD[5]) Password proof from Battle.net
+			 */
+
+			/**
+			 * (BOOLEAN) Success
 			 */
 			break;
+		}
 
-		case BNLS_HASHDATA:
-			/* (DWORD) 		The size of the data to be hashed. Note: This is no longer restricted to 64 bytes.
+		case BNLS_HASHDATA: {
+			/**
+			 * (DWORD) 		The size of the data to be hashed. Note: This is no longer restricted to 64 bytes.
 			 * (DWORD) 		Flags
 			 * (VOID)		Data to be hashed.
+			 *
 			 * Optional Data:
 			 * (DWORD)		Client key. Present only if HASHDATA_FLAG_DOUBLEHASH (0x02) is specified.
 			 * (DWORD)		Server key. Present only if HASHDATA_FLAG_DOUBLEHASH (0x02) is specified.
 			 * (DWORD)		Cookie. Present only if HASHDATA_FLAG_COOKIE (0x04) is specified.
 			 */
-			break;
-		case BNLS_CDKEY_EX:
-			/* (DWORD) 				Cookie. This value has no special meaning to the server and will simply be echoed to the client in the response.
-			 * (BYTE)				Amount of CD-keys to encrypt. Must be between 1 and 32.
-			 * (DWORD)				Flags
-			 * (DWORD(s))			Server session key(s), depending on the flags.
-			 * (OPTIONAL DWORD(s)) 	Client session key(s), depending on the flags.
-			 * (STRING(s))			CD-keys. No dashes or spaces. The client can use multiple types of CD-keys in the same packet.
+
+			/**
+			 * (DWORD[5]) The data hash.
+			 *
+			 * Optional:
+			 * (DWORD) Cookie. Same as the cookie from the request.
 			 */
 			break;
+		}
+
+		case BNLS_CDKEY_EX: {
+			/**
+			 * (DWORD)    Cookie. This value has no special meaning to the server and will simply be echoed to the client in the response.
+			 * (BYTE)     Amount of CD-keys to encrypt. Must be between 1 and 32.
+			 * (DWORD)    Flags
+			 * (DWORD[])  Server session key(s) (optional; check flags)
+			 * (DWORD[])  Client session key(s) (optional; check flags)
+			 * (STRING[]) CD-keys. No dashes or spaces. The client can use multiple types of CD-keys in the same packet.
+			 */
+
+			/**
+			 * (DWORD) Cookie
+			 * (BYTE)  Number of CD-keys requested
+			 * (BYTE)  Number of successfully ecrypted CD-keys
+			 * (DWORD) Bit mask
+			 *
+			 * For each successful CD Key:
+			 * (DWORD)    Client session key
+			 * (DWORD[9]) CD-key data.
+			 */
+			break;
+		}
 
 		case BNLS_CHOOSENLSREVISION: {
-			/* (DWORD)		NLS Revision Number
+			/**
+			 * (DWORD) NLS Revision Number
 			 */
 			u_int32_t nls_rev;
 			if(!read_dword(&pr, &nls_rev)) {
@@ -183,24 +277,37 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			break;
 		}
 
-		case BNLS_AUTHORIZE:
-			/* (STRING) Bot ID
+		case BNLS_AUTHORIZE: {
+			/**
+			 * (STRING) Bot ID
+			 */
+
+			/**
+			 * (BOOLEAN) Server code
 			 */
 			write_init(&pw, cbls, BNLS_AUTHORIZE, 4);
-			write_dword(&pw, 0); // (DWORD) Server code
+			write_dword(&pw, 0);
 			write_end(&pw);
 			break;
+		}
 
-		case BNLS_AUTHORIZEPROOF:
-			/* (DWORD) Checksum
+		case BNLS_AUTHORIZEPROOF: {
+			/**
+			 * (DWORD) Checksum
+			 */
+
+			/**
+			 * (DWORD) Status code (0=Authorized, 1=Unauthorized)
 			 */
 			write_init(&pw, cbls, BNLS_AUTHORIZEPROOF, 4);
-			write_dword(&pw, 0); // (DWORD) 0=Authorized, 1=Unauthorized
+			write_dword(&pw, 0);
 			write_end(&pw);
 			break;
+		}
 
 		case BNLS_REQUESTVERSIONBYTE: {
-			/* (DWORD) Product ID
+			/**
+			 * (DWORD) Product ID
 			 */
 			u_int32_t prod;
 			if(!read_dword(&pr, &prod)) {
@@ -223,75 +330,141 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 
 			/**
 			 * (DWORD) Product ID (0 for error)
+			 *
+			 * If product is non-zero:
 			 * (DWORD) Version byte
 			 */
 			write_init(&pw, cbls, BNLS_REQUESTVERSIONBYTE, 8);
 			write_dword(&pw, prod);
-			write_dword(&pw, verb);
+			if(prod != 0)
+				write_dword(&pw, verb);
 			write_end(&pw);
-			break; }
+			break;
+		}
 
-		case BNLS_VERIFYSERVER:
-			/* (DWORD) 		Server's IP
-			 * (128 bytes) 	Signature
+		case BNLS_VERIFYSERVER: {
+			/**
+			 * (DWORD)     Server's IP
+			 * (DWORD[32]) Signature
+			 */
+
+			/**
+			 * (BOOLEAN) Success
 			 */
 			break;
+		}
 
-		case BNLS_RESERVESERVERSLOTS:
-			/* (DWORD) 		Number of slots to reserve
-			 * BNLS may limit the number of slots to a reasonable value.
+		case BNLS_RESERVESERVERSLOTS: {
+			/**
+			 * (DWORD) Number of slots to reserve
+			 * BNLS may limit the number of slots to a reasonable value
+			 */
+
+			/**
+			 * (DWORD) Number of slots reserved
 			 */
 			break;
+		}
 
-		case BNLS_SERVERLOGONCHALLENGE:
-			/* (DWORD) 		Slot Index
-			 * (DWORD)		NLS Revision Number
-			 * (16 DWORDs)	Data from Account Database
-			 * (8 DWORDs)	Data from the client's SID_AUTH_ACCOUNTLOGON (0x53) request
+		case BNLS_SERVERLOGONCHALLENGE: {
+			/**
+			 * (DWORD)     Slot Index
+			 * (DWORD)     NLS Revision Number
+			 * (DWORD[16]) Data from Account Database
+			 * (DWORD[8])  Data from SID_AUTH_ACCOUNTLOGON
+			 */
+
+			/**
+			 * (DWORD)     Slot index
+			 * (DWORD[16]) Data for SID_AUTH_ACCOUNTLOGON
 			 */
 			break;
+		}
 
 		case BNLS_SERVERLOGONPROOF:
-			/* (DWORD) 		Slot Index
-			 * (5 DWORDs)	Data from the clien't SID_AUTH_ACCOUNTLOGONPROOF (0x54) request
-			 * (STRING)		The client's Account Name
+			/**
+			 * (DWORD)    Slot Index
+			 * (DWORD[5]) Data from SID_AUTH_ACCOUNTLOGONPROOF
+			 * (STRING)   The client's Account Name
+			 */
+
+			/**
+			 * (DWORD)    Slot index.
+			 * (BOOLEAN)  Success
+			 * (DWORD[5]) Data for SID_AUTH_ACCOUNTLOGONPROOF
 			 */
 			break;
 
-		case BNLS_VERSIONCHECKEX:
-			/* (DWORD)		Product ID
-			 * (DWORD)		Version DLL digit in the range 0-7 (For example, for IX86Ver1.mpq, the digit is 1)
-			 * (DWORD)		Flags (must be set to 0 or you will be disconnected!)
-			 * (DWORD)		Cookie
-			 * (STRING)		Checksum Formula
+		case BNLS_VERSIONCHECKEX: {
+			/**
+			 * (DWORD)  Product ID
+			 * (DWORD)  Version DLL digit in the range 0-7 (For example, for IX86Ver1.mpq, the digit is 1)
+			 * (DWORD)  Flags (must be set to 0 or you will be disconnected!)
+			 * (DWORD)  Cookie
+			 * (STRING) Checksum Formula
+			 */
+
+			/**
+			 * (BOOLEAN) Success
+			 *
+			 * If success is true:
+			 * (DWORD)  Version
+			 * (DWORD)  Checksum
+			 * (STRING) Version check stat string
+			 * (DWORD)  Cookie
+			 * (DWORD)  The latest version code for this product
+			 *
+			 * Otherwise:
+			 * (DWORD) Cookie
 			 */
 			break;
+		}
 
-		case BNLS_VERSIONCHECKEX2:
-			/* (DWORD)		Product ID
-			 * (DWORD)		Flags (must be set to 0 or you will be disconnected!)
-			 * (DWORD)		Cookie
-			 * (ULONGLONG)	Timestamp for Version Check Archive
-			 * (STRING)		Version Check Archive Filename
-			 * (STRING)		Checksum Formula
+		case BNLS_VERSIONCHECKEX2: {
+			/**
+			 * (DWORD)  Product ID
+			 * (DWORD)  Flags (must be set to 0 or you will be disconnected!)
+			 * (DWORD)  Cookie
+			 * (QWORD)  Timestamp for Version Check Archive
+			 * (STRING) Version Check Archive Filename
+			 * (STRING) Checksum Formula
+			 */
+
+			/**
+			 * (BOOLEAN) Success
+			 *
+			 * If success is true:
+			 * (DWORD)  Version
+			 * (DWORD)  Checksum
+			 * (STRING) Version check stat string
+			 * (DWORD)  Cookie
+			 * (DWORD)  The latest version code for this product
+			 *
+			 * Otherwise:
+			 * (DWORD) Cookie
 			 */
 			break;
+		}
 
-		case BNLS_WARDEN:
-			/* (BYTE)		Usage
-			 * (DWORD)		Cookie
+		case BNLS_WARDEN: {
+			/**
+			 * (BYTE)  Usage
+			 * (DWORD) Cookie
+			 *
 			 * Usage 0x00
-			 * (DWORD)		Client
-			 * (WORD)		Length of Seed (should be 4 always)
-			 * (VOID)		Seed
-			 * (STRING)		Username
-			 * (WORD)		Length of password
-			 * (VOID)		Password
+			 * (DWORD)  Client
+			 * (WORD)   Length of Seed (should be 4 always)
+			 * (VOID)   Seed
+			 * (STRING) Username
+			 * (WORD)   Length of password
+			 * (VOID)   Password
+			 *
 			 * Usage 0x01
-			 * (WORD)		Length of Warden Packet
-			 * (VOID)		Warden Packet Data
+			 * (WORD) Length of Warden Packet
+			 * (VOID) Warden Packet Data
 			 */
 			break;
+		}
 
 		default:
 			// Received unknown packet
