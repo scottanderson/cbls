@@ -2,7 +2,7 @@
  * debug.h
  *
  *  Created on: Sep 28, 2009
- *      Author: sanderson
+ *      Author: Scott
  */
 
 #ifndef DEBUG_H_

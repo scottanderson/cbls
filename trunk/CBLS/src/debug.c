@@ -2,7 +2,7 @@
  * bindump.c
  *
  *  Created on: Sep 28, 2009
- *      Author: sanderson
+ *      Author: Scott
  */
 
 #include <stdio.h>

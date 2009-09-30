@@ -61,35 +61,21 @@ decode (struct qbuf *qdst, struct qbuf *qsrc)
 void
 cbls_protocol_rcv(struct cbls_conn *cbls)
 {
-	struct qbuf *in;
-	struct bnls_hdr *hdr;
+	struct packet_reader pr;
 	struct packet_writer pw;
 
-	in = &cbls->in;
+	while(cbls->in.pos >= SIZEOF_BNLS_HDR) {
+		read_init(&pr, cbls);
 
-	/*cbls_log("cbls_protocol_recv[%d] qbuf size is %d", cbls->fd, in->pos);*/
-
-	while(in->pos >= SIZEOF_BNLS_HDR) {
-		hdr = (struct bnls_hdr *)&in->buf[0];
-
-		if(hdr->id > BNLS_VERSIONCHECKEX2) {
-			cbls_log("Invalid packet id 0x%X", hdr->id);
+		if(!read_valid(&pr)) {
 			cbls_close(cbls);
 			return;
 		}
 
-		if(hdr->len > 0xFF) {
-			cbls_log("Invalid packet len 0x%X", hdr->len);
-			cbls_close(cbls);
-			return;
-		}
-
-		if(in->pos < hdr->len) {
-			/*cbls_log("Packet incomplete [%d/%d]", in->pos, hdr->len);*/
+		if(!read_ready(&pr))
 			break;
-		}
 
-		switch(hdr->id) {
+		switch(pr.ih->id) {
 		case BNLS_NULL:
 			/* No response from the server from this message. Simply a keep-alive.
 			 */
@@ -177,20 +163,24 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 		case BNLS_CHOOSENLSREVISION: {
 			/* (DWORD)		NLS Revision Number
 			 */
-			m_nlsrevision = *(u_int32_t*)&hdr->data[0];
-			if (m_nlsrevision < 0 || m_nlsrevision > 2)
-			{
+			u_int32_t nls_rev;
+			if(!read_dword(&pr, &nls_rev)) {
+				cbls_close(cbls);
+				return;
+			}
+
+			/**
+			 * (BOOLEAN) Success code
+			 */
+			write_init(&pw, cbls, BNLS_CHOOSENLSREVISION, 4);
+			if (nls_rev < 0 || nls_rev > 2) {
 				//Unsuccessful, unknown NLS Type
-				write_init(&pw, cbls, BNLS_CHOOSENLSREVISION, 4);
 				write_dword(&pw, 0);
-				write_end(&pw);
-				m_nlsrevision = 1;
 			} else {
 				//Successful
-				write_init(&pw, cbls, BNLS_CHOOSENLSREVISION, 4);
 				write_dword(&pw, 1);
-				write_end(&pw);
 			}
+			write_end(&pw);
 			break;
 		}
 
@@ -213,10 +203,12 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 		case BNLS_REQUESTVERSIONBYTE: {
 			/* (DWORD) Product ID
 			 */
-			u_int32_t prod = *(u_int32_t*)&hdr->data[0];
-			u_int32_t verb;
-			if(hdr->len < 4)
+			u_int32_t prod;
+			if(!read_dword(&pr, &prod)) {
 				prod = 0;
+			}
+
+			u_int32_t verb;
 			switch(prod) {
 			case 1: case 2:  verb = 0xd3; break;
 			case 3:          verb = 0x4f; break;
@@ -230,9 +222,13 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 				verb = 0;
 			}
 
+			/**
+			 * (DWORD) Product ID (0 for error)
+			 * (DWORD) Version byte
+			 */
 			write_init(&pw, cbls, BNLS_REQUESTVERSIONBYTE, 8);
-			write_dword(&pw, prod); // (DWORD) Product ID (0 for error)
-			write_dword(&pw, verb); // (DWORD) Version byte
+			write_dword(&pw, prod);
+			write_dword(&pw, verb);
 			write_end(&pw);
 			break; }
 
@@ -300,14 +296,12 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 
 		default:
 			// Received unknown packet
-			packet_log("RECV unknown packet", hdr);
+			packet_log("RECV unknown packet", pr.ih);
 			cbls_close(cbls);
 			return;
 		}
 
 		// Remove the packet from the buffer
-		if(in->pos != hdr->len)
-			memmove(&in->buf[0], &in->buf[hdr->len], in->pos - hdr->len);
-		in->pos -= hdr->len;
+		read_end(&pr);
 	}
 }
