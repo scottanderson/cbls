@@ -6,6 +6,7 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 #include "sys_types.h"
 #include "sys_net.h"
 #include "cbls.h"
@@ -83,12 +84,20 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (DWORD)  Session key from Battle.net
 			 * (STRING) CD-Key, no dashes or spaces
 			 */
+			u_int32_t sess;
+			u_int32_t client_token = (u_int32_t)rand();
+
+			if (!read_dword(&pr, &sess)) {
+				cbls_close(cbls);
+				return;
+			}
 
 			/**
 			 * (BOOLEAN)  Result
 			 * (DWORD)    Client Token
 			 * (DWORD[9]) CD key data for SID_AUTH_CHECK
 			 */
+
 			break;
 		}
 
