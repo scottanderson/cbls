@@ -5,6 +5,7 @@
  *      Author: Scott
  */
 
+#include <string.h>
 #include "sys_types.h"
 #include "sys_net.h"
 #include "cbls.h"
@@ -118,6 +119,18 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 
 	while(in->pos >= SIZEOF_BNLS_HDR) {
 		hdr = (struct bnls_hdr *)&in->buf[0];
+
+		if(hdr->id > BNLS_VERSIONCHECKEX2) {
+			cbls_log("Invalid packet id 0x%X", hdr->id);
+			cbls_close(cbls);
+			return;
+		}
+
+		if(hdr->len > 0xFF) {
+			cbls_log("Invalid packet len 0x%X", hdr->len);
+			cbls_close(cbls);
+			return;
+		}
 
 		if(in->pos < hdr->len) {
 			/*cbls_log("Packet incomplete [%d/%d]", in->pos, hdr->len);*/
