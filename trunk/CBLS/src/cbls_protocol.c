@@ -15,8 +15,6 @@
 
 extern void cbls_log (const char *fmt, ...);
 
-int m_nlsrevision; //Stored NLS Revision Number
-
 // cbls->read_in has new data off the wire; copy data to cbls->in
 u_int32_t
 decode (struct qbuf *qdst, struct qbuf *qsrc)
@@ -179,6 +177,7 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			} else {
 				//Successful
 				write_dword(&pw, 1);
+				cbls->nls_rev = nls_rev;
 			}
 			write_end(&pw);
 			break;
