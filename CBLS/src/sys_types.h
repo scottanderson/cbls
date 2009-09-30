@@ -14,6 +14,7 @@
 typedef unsigned __int8 u_int8_t;
 typedef unsigned __int16 u_int16_t;
 typedef unsigned __int32 u_int32_t;
+typedef unsigned __int64 u_int64_t;
 #endif
 
 #endif /* TYPES_H_ */

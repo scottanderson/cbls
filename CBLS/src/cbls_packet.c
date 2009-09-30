@@ -68,8 +68,29 @@ read_raw(struct packet_reader *pr, void *dest, int len) {
 }
 
 int
+read_byte(struct packet_reader *pr, u_int8_t *dest) {
+	return read_raw(pr, dest, 1);
+}
+
+int
+read_word(struct packet_reader *pr, u_int16_t *dest) {
+	return read_raw(pr, dest, 2);
+}
+
+int
 read_dword(struct packet_reader *pr, u_int32_t *dest) {
 	return read_raw(pr, dest, 4);
+}
+
+int
+read_qword(struct packet_reader *pr, u_int64_t *dest) {
+	return read_raw(pr, dest, 8);
+}
+
+char*
+read_string(struct packet_reader *pr) {
+	// TODO: implement
+	return 0;
 }
 
 void
