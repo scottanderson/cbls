@@ -141,6 +141,12 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 		case BNLS_NULL:
 			break;
 			
+		case BNLS_CDKEY:
+			/* (DWORD) 	Session key from Battle.net. This is the second DWORD in SID_AUTH_INFO (0x50)
+			 * (STRING)	CD-Key. No dashes or spaces.
+			 */
+			u_int32_t m_session = *(u_int_32_t*)&hdr->data[0];
+
 		case BNLS_AUTHORIZE:
 			/* (STRING) Bot ID
 			 */
