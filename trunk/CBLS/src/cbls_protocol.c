@@ -13,6 +13,7 @@
 #include "bnls.h"
 #include "cbls_packet.h"
 #include "debug.h"
+#include "bncsutil\bncsutil.h"
 
 extern void cbls_log (const char *fmt, ...);
 
@@ -84,15 +85,16 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (DWORD)  Session key from Battle.net
 			 * (STRING) CD-Key, no dashes or spaces
 			 */
-			u_int32_t session_key;
+			u_int32_t sess;
+			u_int32_t client_token = (u_int32_t)rand();
 			char *cdkey;
-			if(!read_dword(&pr, &session_key)
-			|| !(cdkey = read_string(&pr))) {
+			int i;
+
+			if (!read_dword(&pr, &sess) || !(cdkey = read_string(&pr))) {
 				cbls_close(cbls);
 				return;
 			}
 
-			int i;
 
 			/**
 			 * (BOOLEAN)  Result
@@ -445,6 +447,23 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (STRING) Version Check Archive Filename
 			 * (STRING) Checksum Formula
 			 */
+			u_int32_t productid;
+			u_int32_t flags;
+			u_int32_t cookie;
+			u_int64_t timestamp;
+			char *vc_filename;
+			char *checksum_formula;
+
+			if (!read_dword(&pr, &productid)
+			|| !read_dword(&pr, &flags)
+			|| !read_dword(&pr, &cookie)
+			|| !read_qword(&pr, &timestamp)
+			|| !(vc_filename = read_string(&pr))
+			|| !(checksum_formula = read_string(&pr))) {
+				cbls_close(cbls);
+				return;
+			}
+
 
 			/**
 			 * (BOOLEAN) Success
