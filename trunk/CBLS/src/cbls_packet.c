@@ -64,6 +64,7 @@ read_raw(struct packet_reader *pr, void *dest, int len) {
 		return 0;
 
 	memcpy(dest, &hdr->data[pr->pos], len);
+	pr->pos += len;
 	return 1;
 }
 
