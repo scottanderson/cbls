@@ -31,6 +31,18 @@ struct bnls_hdr {
 };
 #define SIZEOF_BNLS_HDR		(3)
 
+#define PRODUCT_STAR (0x01)
+#define PRODUCT_SEXP (0x01)
+#define PRODUCT_W2BN (0x03)
+#define PRODUCT_D2DV (0x04)
+#define PRODUCT_D2XP (0x05)
+#define PRODUCT_JSTR (0x06)
+#define PRODUCT_WAR3 (0x07)
+#define PRODUCT_W3XP (0x08)
+#define PRODUCT_DRTL (0x09)
+#define PRODUCT_DSHR (0x0A)
+#define PRODUCT_SSHR (0x0B)
+
 #define BNLS_NULL					((u_int8_t) 0x00)
 #define BNLS_CDKEY					((u_int8_t) 0x01)
 #define BNLS_LOGONCHALLENGE			((u_int8_t) 0x02)
