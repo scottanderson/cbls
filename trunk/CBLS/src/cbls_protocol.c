@@ -82,19 +82,26 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			
 		case BNLS_CDKEY: {
 			/**
-			 * (DWORD)  Session key from Battle.net
+			 * (DWORD)  Server Token
 			 * (STRING) CD-Key, no dashes or spaces
 			 */
-			u_int32_t sess;
-			u_int32_t client_token = (u_int32_t)rand();
+			u_int32_t server_token;
 			char *cdkey;
-			int i;
 
-			if (!read_dword(&pr, &sess) || !(cdkey = read_string(&pr))) {
+			if(!read_dword(&pr, &server_token)
+			|| !(cdkey = read_string(&pr))) {
 				cbls_close(cbls);
 				return;
 			}
 
+			/***/
+			u_int32_t result = 0;
+			u_int32_t client_token = (u_int32_t)rand();
+			u_int32_t hash[9];
+
+			int i;
+			for(i = 0; i < 9; i++)
+				hash[i] = 0;
 
 			/**
 			 * (BOOLEAN)  Result
@@ -102,10 +109,10 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (DWORD[9]) CD key data for SID_AUTH_CHECK
 			 */
 			write_init(&pw, cbls, BNLS_CDKEY, 4);
-			write_dword(&pw, 0); // fail
-			write_dword(&pw, 0);
+			write_dword(&pw, result); // fail
+			write_dword(&pw, client_token);
 			for(i = 0; i < 9; i++)
-				write_dword(&pw, 0);
+				write_dword(&pw, hash[i]);
 			write_end(&pw);
 			break;
 		}
@@ -299,6 +306,14 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			/**
 			 * (STRING) Bot ID
 			 */
+			char *botid;
+			if(!(botid = read_string(&pr))) {
+				cbls_close(cbls);
+				return;
+			}
+
+			/***/
+			cbls_log("[%u] logging in as %s", cbls->uid, botid);
 
 			/**
 			 * (BOOLEAN) Server code
@@ -313,6 +328,9 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			/**
 			 * (DWORD) Checksum
 			 */
+
+			/***/
+			cbls_log("[%u] login success", cbls->uid);
 
 			/**
 			 * (DWORD) Status code (0=Authorized, 1=Unauthorized)
@@ -332,6 +350,7 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 				prod = 0;
 			}
 
+			/***/
 			// FIXME: don't hard-code version bytes
 			u_int32_t verb;
 			switch(prod) {
@@ -366,9 +385,15 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (DWORD[32]) Signature
 			 */
 
+			/***/
+			u_int32_t success = 0;
+
 			/**
 			 * (BOOLEAN) Success
 			 */
+			write_init(&pw, cbls, BNLS_VERIFYSERVER, 4);
+			write_dword(&pw, success);
+			write_end(&pw);
 			break;
 		}
 
@@ -378,9 +403,15 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * BNLS may limit the number of slots to a reasonable value
 			 */
 
+			/***/
+			u_int32_t slots = 0;
+
 			/**
 			 * (DWORD) Number of slots reserved
 			 */
+			write_init(&pw, cbls, BNLS_RESERVESERVERSLOTS, 4);
+			write_dword(&pw, slots);
+			write_end(&pw);
 			break;
 		}
 
@@ -421,6 +452,22 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (DWORD)  Cookie
 			 * (STRING) Checksum Formula
 			 */
+			u_int32_t productid;
+			u_int32_t version_dll;
+			u_int32_t flags;
+			u_int32_t cookie;
+			char *checksum_formula;
+
+			if (!read_dword(&pr, &productid)
+			|| !read_dword(&pr, &version_dll)
+			|| !read_dword(&pr, &flags)
+			|| !read_dword(&pr, &cookie)
+			|| !(checksum_formula = read_string(&pr))) {
+				cbls_close(cbls);
+				return;
+			}
+
+			/***/
 
 			/**
 			 * (BOOLEAN) Success
@@ -435,6 +482,10 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * Otherwise:
 			 * (DWORD) Cookie
 			 */
+			write_init(&pw, cbls, BNLS_VERSIONCHECKEX2, 8);
+			write_dword(&pw, 0);
+			write_dword(&pw, cookie);
+			write_end(&pw);
 			break;
 		}
 
@@ -464,6 +515,7 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 				return;
 			}
 
+			/***/
 
 			/**
 			 * (BOOLEAN) Success
@@ -478,6 +530,10 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * Otherwise:
 			 * (DWORD) Cookie
 			 */
+			write_init(&pw, cbls, BNLS_VERSIONCHECKEX2, 8);
+			write_dword(&pw, 0);
+			write_dword(&pw, cookie);
+			write_end(&pw);
 			break;
 		}
 
@@ -498,6 +554,29 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (WORD) Length of Warden Packet
 			 * (VOID) Warden Packet Data
 			 */
+			u_int8_t usage;
+			u_int32_t cookie;
+			if(!read_byte(&pr, &usage)
+			|| !read_dword(&pr, &cookie)) {
+				cbls_close(cbls);
+				return;
+			}
+
+			/***/
+
+			/**
+			 * (BYTE)  Usage
+			 * (DWORD) Cookie
+			 * (BYTE)  Result
+			 * (WORD)  Lengh of data
+			 * (VOID)  Data
+			 */
+			write_init(&pw, cbls, BNLS_WARDEN, 8);
+			write_byte(&pw, usage);
+			write_dword(&pw, cookie);
+			write_byte(&pw, 0x04); // error executing warden module
+			write_word(&pw, 0);
+			write_end(&pw);
 			break;
 		}
 
