@@ -33,7 +33,10 @@ struct packet_writer {
 
 void write_init(struct packet_writer *pw, struct cbls_conn *cbls, int packetid, int min_length);
 void write_raw(struct packet_writer *pw, void *data, int len);
+void write_byte(struct packet_writer *pw, u_int8_t value);
+void write_word(struct packet_writer *pw, u_int16_t value);
 void write_dword(struct packet_writer *pw, u_int32_t value);
+void write_qword(struct packet_writer *pw, u_int64_t value);
 void write_end(struct packet_writer *pw);
 
 #endif /* CBLS_PACKET_H_ */

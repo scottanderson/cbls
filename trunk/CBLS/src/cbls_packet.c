@@ -151,8 +151,23 @@ write_raw(struct packet_writer *pw, void *data, int len) {
 }
 
 void
+write_byte(struct packet_writer *pw, u_int8_t value) {
+	write_raw(pw, &value, 1);
+}
+
+void
+write_word(struct packet_writer *pw, u_int16_t value) {
+	write_raw(pw, &value, 2);
+}
+
+void
 write_dword(struct packet_writer *pw, u_int32_t value) {
 	write_raw(pw, &value, 4);
+}
+
+void
+write_qword(struct packet_writer *pw, u_int64_t value) {
+	write_raw(pw, &value, 8);
 }
 
 void
