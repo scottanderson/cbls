@@ -56,4 +56,30 @@ struct bnls_hdr {
 #define BNLS_VERSIONCHECKEX2		((u_int8_t) 0x1A)
 #define BNLS_WARDEN					((u_int8_t) 0x7D)
 
+typedef void (*bnls_packet_handler_t)(struct packet_reader *);
+void bnls_null(struct packet_reader *pr);
+void bnls_cdkey(struct packet_reader *pr);
+void bnls_logonchallenge(struct packet_reader *pr);
+void bnls_logonproof(struct packet_reader *pr);
+void bnls_createaccount(struct packet_reader *pr);
+void bnls_changechallenge(struct packet_reader *pr);
+void bnls_changeproof(struct packet_reader *pr);
+void bnls_upgradechallenge(struct packet_reader *pr);
+void bnls_upgradeproof(struct packet_reader *pr);
+void bnls_versioncheck(struct packet_reader *pr);
+void bnls_confirmlogon(struct packet_reader *pr);
+void bnls_hashdata(struct packet_reader *pr);
+void bnls_cdkey_ex(struct packet_reader *pr);
+void bnls_choosenlsrevision(struct packet_reader *pr);
+void bnls_authorize(struct packet_reader *pr);
+void bnls_authorizeproof(struct packet_reader *pr);
+void bnls_requestversionbyte(struct packet_reader *pr);
+void bnls_verifyserver(struct packet_reader *pr);
+void bnls_reserveserverslots(struct packet_reader *pr);
+void bnls_serverlogonchallenge(struct packet_reader *pr);
+void bnls_serverlogonproof(struct packet_reader *pr);
+void bnls_versioncheckex(struct packet_reader *pr);
+void bnls_versioncheckex2(struct packet_reader *pr);
+void bnls_warden(struct packet_reader *pr);
+
 #endif /* BNLS_H_ */
