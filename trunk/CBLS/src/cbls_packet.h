@@ -22,6 +22,7 @@ int read_byte(struct packet_reader *pr, u_int8_t *dest);
 int read_word(struct packet_reader *pr, u_int16_t *dest);
 int read_dword(struct packet_reader *pr, u_int32_t *dest);
 int read_qword(struct packet_reader *pr, u_int64_t *dest);
+void* read_void(struct packet_reader *pr, int len);
 char* read_string(struct packet_reader *pr);
 void read_end(struct packet_reader *pr);
 
