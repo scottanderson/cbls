@@ -166,9 +166,9 @@ bnls_versioncheck(struct packet_reader *pr) {
 	 * (BOOLEAN) Success
 	 *
 	 * If Success is TRUE:
-	 * (DWORD)   Version
-	 * (DWORD)   Checksum
-	 * (STRING)  Version check stat string
+	 * (DWORD)  Version
+	 * (DWORD)  Checksum
+	 * (STRING) Version check stat string
 	 */
 }
 
@@ -187,14 +187,14 @@ void
 bnls_hashdata(struct packet_reader *pr) {
 	struct cbls_conn *cbls = pr->cbls;
 	/**
-	 * (DWORD) 		The size of the data to be hashed. Note: This is no longer restricted to 64 bytes.
-	 * (DWORD) 		Flags
-	 * (VOID)		Data to be hashed.
+	 * (DWORD) The size of the data to be hashed. Note: This is no longer restricted to 64 bytes.
+	 * (DWORD) Flags
+	 * (VOID)  Data to be hashed.
 	 *
 	 * Optional Data:
-	 * (DWORD)		Client key. Present only if HASHDATA_FLAG_DOUBLEHASH (0x02) is specified.
-	 * (DWORD)		Server key. Present only if HASHDATA_FLAG_DOUBLEHASH (0x02) is specified.
-	 * (DWORD)		Cookie. Present only if HASHDATA_FLAG_COOKIE (0x04) is specified.
+	 * (DWORD) Client key. Present only if HASHDATA_FLAG_DOUBLEHASH (0x02) is specified.
+	 * (DWORD) Server key. Present only if HASHDATA_FLAG_DOUBLEHASH (0x02) is specified.
+	 * (DWORD) Cookie. Present only if HASHDATA_FLAG_COOKIE (0x04) is specified.
 	 */
 	u_int32_t data_len;
 	u_int32_t flags;
