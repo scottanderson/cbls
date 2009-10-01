@@ -13,7 +13,7 @@
 #include "bnls.h"
 #include "cbls_packet.h"
 #include "debug.h"
-#include "bncsutil\bncsutil.h"
+#include "bncsutil.h"
 
 extern void cbls_log (const char *fmt, ...);
 
@@ -95,13 +95,21 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			}
 
 			/***/
-			u_int32_t result = 0;
+			u_int32_t result;
 			u_int32_t client_token = (u_int32_t)rand();
 			u_int32_t hash[9];
 
-			int i;
-			for(i = 0; i < 9; i++)
-				hash[i] = 0;
+			result = !kd_quick(cdkey, client_token, server_token,
+					&hash[2], &hash[1], (void*)&hash[4], 20);
+
+			if(result) {
+				// Success
+				hash[0] = strlen(cdkey);
+				hash[3] = 0;
+			} else {
+				// Failure
+				memset(hash, 0, 36);
+			}
 
 			/**
 			 * (BOOLEAN)  Result
@@ -109,10 +117,9 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 			 * (DWORD[9]) CD key data for SID_AUTH_CHECK
 			 */
 			write_init(&pw, cbls, BNLS_CDKEY, 4);
-			write_dword(&pw, result); // fail
+			write_dword(&pw, result);
 			write_dword(&pw, client_token);
-			for(i = 0; i < 9; i++)
-				write_dword(&pw, hash[i]);
+			write_raw(&pw, hash, 36);
 			write_end(&pw);
 			break;
 		}
