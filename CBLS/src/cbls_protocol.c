@@ -10,6 +10,7 @@
 #include "sys_types.h"
 #include "sys_net.h"
 #include "cbls.h"
+#include "cbls_server.h"
 #include "cbls_packet.h"
 #include "bnls.h"
 #include "debug.h"
@@ -179,6 +180,9 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 
 		if(handler) {
 			handler(&pr);
+			/* handler could have called cbls_close */
+			if (!cbls_files[cbls->fd].conn.cbls)
+				return;
 		} else {
 			// Received unknown packet
 			packet_log("RECV unknown packet", pr.ih);
