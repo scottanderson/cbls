@@ -18,6 +18,7 @@
 #include "cbls_protocol.h"
 
 u_int16_t ncbls_conns = 0;
+u_int16_t cbls_conn_counter = 0;
 
 struct cbls_conn __cbls_list, *cbls_list = &__cbls_list, *cbls_tail = &__cbls_list;
 
@@ -41,6 +42,7 @@ cbls_new (void)
 	cbls_tail = cbls;
 	ncbls_conns++;
 	//cbls->access_extra.can_login = 1;
+	cbls->uid = cbls_conn_counter++;
 
 	return cbls;
 }
@@ -57,9 +59,8 @@ cbls_close (struct cbls_conn *cbls)
 	cbls_fd_del(fd);
 	memset(&cbls_files[fd], 0, sizeof(struct cbls_file));
 	inaddr2str(abuf, &cbls->sockaddr);
-	cbls_log("%s:%u - %u - cbls connection closed",
-		abuf, ntohs(cbls->sockaddr.SIN_PORT),
-		cbls->uid);
+	cbls_log("[%u] %s:%u -- cbls connection closed",
+		cbls->uid, abuf, ntohs(cbls->sockaddr.SIN_PORT));
 	//timer_delete_ptr(cbls);
 	if (cbls->next)
 		cbls->next->prev = cbls->prev;
@@ -99,7 +100,7 @@ cbls_read (int fd)
 #else
 		if (r == 0 || (r < 0 && err != EWOULDBLOCK && err != EINTR)) {
 #endif
-			cbls_log("cbls_read; %d %s", r, strerror(errno));
+			cbls_log("[%u] cbls_read; %d %s", cbls->uid, r, strerror(errno));
 			cbls_close(cbls);
 		}
 	} else {
@@ -114,7 +115,7 @@ cbls_read (int fd)
 				if (!cbls_files[fd].conn.cbls)
 					return;
 			} else {
-				cbls_log("cbls->recv was null [%d]", fd, strerror(errno));
+				cbls_log("[%u] cbls->rcv was null %s", cbls->uid, strerror(errno));
 				cbls_close(cbls);
 				return;
 			}
@@ -130,7 +131,7 @@ cbls_write (int fd)
 	int err;
 
 	if (cbls->out.len == 0) {
-		/*cbls_log("cbls->out.len == 0 but cbls_write was called...");*/
+		cbls_log("[%u] cbls->out.len == 0 but cbls_write was called...", cbls->uid);
 		cbls_fd_clr(fd, FDW);
 		return;
 	}
@@ -142,7 +143,7 @@ cbls_write (int fd)
 #else
 		if (r == 0 || (r < 0 && err != EWOULDBLOCK && err != EINTR)) {
 #endif
-			/*cbls_log("cbls_write(%u); %d %s", cbls->out.len, r, strerror(errno));*/
+			cbls_log("[%u] cbls_write(%u); %d %s", cbls->uid, cbls->out.len, r, strerror(errno));
 			cbls_close(cbls);
 		}
 	} else {

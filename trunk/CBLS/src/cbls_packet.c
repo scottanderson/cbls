@@ -28,12 +28,12 @@ read_valid(struct packet_reader *pr) {
 	struct bnls_hdr *hdr = pr->ih;
 
 	if(hdr->id > BNLS_VERSIONCHECKEX2) {
-		cbls_log("Invalid packet id 0x%X", hdr->id);
+		cbls_log("[%u] Invalid packet id 0x%X", pr->cbls->uid, hdr->id);
 		return 0;
 	}
 
 	if(hdr->len > 0xFF) {
-		cbls_log("Invalid packet len 0x%X", hdr->len);
+		cbls_log("[%u] Invalid packet len 0x%X", pr->cbls->uid, hdr->len);
 		return 0;
 	}
 

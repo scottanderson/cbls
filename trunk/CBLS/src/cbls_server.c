@@ -185,7 +185,7 @@ listen_ready_read (int fd)
 	 */
 //	if (check_banlist(cbls))
 //		return;
-	cbls_log("%s:%u -- cbls connection accepted", abuf, ntohs(saddr.sin_port));
+	cbls_log("[%u] %s:%u -- cbls connection accepted", cbls->uid, abuf, ntohs(saddr.sin_port));
 
 	cbls_accepted(cbls);
 }
