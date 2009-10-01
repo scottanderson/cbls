@@ -88,6 +88,13 @@ read_qword(struct packet_reader *pr, u_int64_t *dest) {
 	return read_raw(pr, dest, 8);
 }
 
+void*
+read_void(struct packet_reader *pr, int len) {
+	void *ret = &pr->ih->data[pr->pos];
+	pr->pos += len;
+	return ret;
+}
+
 char*
 read_string(struct packet_reader *pr) {
 	struct bnls_hdr *hdr = pr->ih;

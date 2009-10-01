@@ -185,6 +185,7 @@ bnls_confirmlogon(struct packet_reader *pr) {
 
 void
 bnls_hashdata(struct packet_reader *pr) {
+	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (DWORD) 		The size of the data to be hashed. Note: This is no longer restricted to 64 bytes.
 	 * (DWORD) 		Flags
@@ -195,6 +196,47 @@ bnls_hashdata(struct packet_reader *pr) {
 	 * (DWORD)		Server key. Present only if HASHDATA_FLAG_DOUBLEHASH (0x02) is specified.
 	 * (DWORD)		Cookie. Present only if HASHDATA_FLAG_COOKIE (0x04) is specified.
 	 */
+	u_int32_t data_len;
+	u_int32_t flags;
+	void *data;
+	u_int32_t client_key;
+	u_int32_t server_key;
+	u_int32_t cookie;
+
+	if(!read_dword(pr, &data_len)
+	|| !read_dword(pr, &flags)
+	|| !(data = read_void(pr, data_len))) {
+		cbls_close(cbls);
+		return;
+	}
+
+	if(flags & 0x02) {
+		if(!read_dword(pr, &client_key)
+		|| !read_dword(pr, &server_key)) {
+			cbls_close(cbls);
+			return;
+		}
+	}
+
+	if(flags & 0x04) {
+		if(!read_dword(pr, &cookie)) {
+			cbls_close(cbls);
+			return;
+		}
+	}
+
+	/***/
+	u_int32_t hash[5];
+	calcHashBuf(data, data_len, (void*)hash);
+	if(flags & 0x02) {
+		int i;
+		u_int32_t dbl_hash[7];
+		dbl_hash[0] = client_key;
+		dbl_hash[1] = server_key;
+		for(i = 0; i < 5; i++)
+			dbl_hash[i+2] = hash[i];
+		calcHashBuf((void*)dbl_hash, 28, (void*)hash);
+	}
 
 	/**
 	 * (DWORD[5]) The data hash.
@@ -202,6 +244,12 @@ bnls_hashdata(struct packet_reader *pr) {
 	 * Optional:
 	 * (DWORD) Cookie. Same as the cookie from the request.
 	 */
+	struct packet_writer pw;
+	write_init(&pw, cbls, BNLS_HASHDATA, (flags & 0x04) ? 24 : 20);
+	write_raw(&pw, hash, 20);
+	if(flags & 0x04)
+		write_dword(&pw, flags);
+	write_end(&pw);
 }
 
 void
