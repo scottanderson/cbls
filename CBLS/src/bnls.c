@@ -516,8 +516,9 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 	char *vc_filename;
 	char *checksum_formula;
 
-	if (!read_dword(pr, &productid)
+	if(!read_dword(pr, &productid)
 	|| !read_dword(pr, &flags)
+	|| (flags != 0)
 	|| !read_dword(pr, &cookie)
 	|| !read_qword(pr, &timestamp)
 	|| !(vc_filename = read_string(pr))
@@ -527,6 +528,43 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 	}
 
 	/***/
+	u_int32_t success, version, checksum, verbyte;
+	char statstr[128];
+	memset(statstr, 0, 128);
+	success = 0;
+
+	char *f_game, *f_storm, *f_snp;
+	switch(productid) {
+	case PRODUCT_WAR3:
+	case PRODUCT_W3XP:
+		f_game = "IX86/WAR3/war3.exe";
+		f_storm = "IX86/WAR3/Storm.dll";
+		f_snp = "IX86/WAR3/game.dll";
+		verbyte = 0x17;
+		break;
+	default:
+		f_game = 0;
+	}
+
+	if(f_game != 0) {
+		int mpqNumber = extractMPQNumber(vc_filename);
+		if(mpqNumber >= 0) {
+			success = checkRevisionFlat(
+					checksum_formula, f_game, f_storm, f_snp, mpqNumber, &checksum);
+			if(success) {
+				success = getExeInfo(
+						f_game, statstr, 128, &version, BNCSUTIL_PLATFORM_X86);
+				if(!success)
+					cbls_log("[%u] getExeInfo() failed", cbls->uid);
+			} else {
+				cbls_log("[%u] checkRevision() failed", cbls->uid);
+			}
+		} else {
+			cbls_log("[%u] failed to extract mpq number from %s", cbls->uid, vc_filename);
+		}
+	} else {
+		cbls_log("[%u] unknown product %u", cbls->uid, productid);
+	}
 
 	/**
 	 * (BOOLEAN) Success
@@ -542,9 +580,18 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 	 * (DWORD) Cookie
 	 */
 	struct packet_writer pw;
-	write_init(&pw, cbls, BNLS_VERSIONCHECKEX2, 8);
-	write_dword(&pw, 0);
-	write_dword(&pw, cookie);
+	// success contains strlen(statstr)
+	write_init(&pw, cbls, BNLS_VERSIONCHECKEX2, (success == 0) ? 8 : 21 + success);
+	write_dword(&pw, !!success);
+	if(!success) {
+		write_dword(&pw, cookie);
+	} else {
+		write_dword(&pw, version);
+		write_dword(&pw, checksum);
+		write_string(&pw, statstr);
+		write_dword(&pw, cookie);
+		write_dword(&pw, verbyte);
+	}
 	write_end(&pw);
 }
 
