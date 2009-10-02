@@ -244,7 +244,7 @@ bnls_hashdata(struct packet_reader *pr) {
 	write_init(&pw, cbls, BNLS_HASHDATA, (flags & 0x04) ? 24 : 20);
 	write_raw(&pw, hash, 20);
 	if(flags & 0x04)
-		write_dword(&pw, flags);
+		write_dword(&pw, cookie);
 	write_end(&pw);
 }
 
