@@ -7,10 +7,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "sys_types.h"
-#include "sys_net.h"
-#include "cbls.h"
-#include "cbls_packet.h"
 #include "bnls.h"
 #include "debug.h"
 #include "bncsutil.h"

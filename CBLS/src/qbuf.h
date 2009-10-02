@@ -8,6 +8,8 @@
 #ifndef QBUF_H_
 #define QBUF_H_
 
+#include "sys_types.h"
+
 struct qbuf {
 	u_int32_t pos, len;
 	u_int8_t *buf;

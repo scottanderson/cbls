@@ -6,10 +6,6 @@
  */
 
 #include <string.h>
-#include "sys_types.h"
-#include "sys_net.h"
-#include "cbls.h"
-#include "cbls_packet.h"
 #include "bnls.h"
 #include "cbls_fd.h"
 //#include "debug.h" /* for packet_log() */
@@ -52,7 +48,7 @@ read_ready(struct packet_reader *pr) {
 		return 0;
 	}
 
-	// Packet is completely recieved
+	// Packet is completely received
 	return 1;
 }
 

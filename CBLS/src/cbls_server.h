@@ -8,6 +8,8 @@
 #ifndef CBLS_H_INCLUDED
 #define CBLS_H_INCLUDED
 
+#include "cbls.h"
+
 struct cbls_file {
 	union {
 		void *ptr;

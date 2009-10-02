@@ -8,6 +8,8 @@
 #ifndef CBLS_FD_H_
 #define CBLS_FD_H_
 
+#include "sys_net.h"
+
 extern int high_fd;
 
 extern fd_set cbls_rfds, cbls_wfds;

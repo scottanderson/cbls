@@ -8,6 +8,8 @@
 #ifndef CBLS_PACKET_H_
 #define CBLS_PACKET_H_
 
+#include "cbls.h"
+
 struct packet_reader {
 	struct cbls_conn *cbls;
 	struct bnls_hdr *ih;
