@@ -357,13 +357,17 @@ bnls_requestversionbyte(struct packet_reader *pr) {
 	// FIXME: don't hard-code version bytes
 	u_int32_t verb;
 	switch(prod) {
-	case 1: case 2:  verb = 0xd3; break;
-	case 3:          verb = 0x4f; break;
-	case 4: case 5:  verb = 0x0c; break;
-	case 6:          verb = 0xa9; break;
-	case 7: case 8:  verb = 0x17; break;
-	case 9: case 10: verb = 0x2a; break;
-	case 11:         verb = 0x1a; break;
+	case PRODUCT_STAR:
+	case PRODUCT_SEXP: verb = 0xd3; break;
+	case PRODUCT_W2BN: verb = 0x4f; break;
+	case PRODUCT_D2DV:
+	case PRODUCT_D2XP: verb = 0x0c; break;
+	case PRODUCT_JSTR: verb = 0xa9; break;
+	case PRODUCT_WAR3:
+	case PRODUCT_W3XP: verb = 0x18; break;
+	case PRODUCT_DRTL:
+	case PRODUCT_DSHR: verb = 0x2a; break;
+	case PRODUCT_SSHR: verb = 0xa5; break;
 	default:
 		prod = 0;
 	}
@@ -540,7 +544,7 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 		f_game = "IX86/WAR3/war3.exe";
 		f_storm = "IX86/WAR3/Storm.dll";
 		f_snp = "IX86/WAR3/game.dll";
-		verbyte = 0x17;
+		verbyte = 0x18;
 		break;
 	default:
 		f_game = 0;
