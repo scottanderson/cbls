@@ -9,6 +9,7 @@
 #define CBLS_H_
 
 #include <sys/time.h>
+#include "sys_net.h"
 #include "qbuf.h"
 
 struct cbls_conn {

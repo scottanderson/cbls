@@ -5,7 +5,6 @@
  *      Author: Scott
  */
 
-#include "sys_types.h"
 #include "xmalloc.h"
 #include "qbuf.h"
 

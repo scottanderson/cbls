@@ -6,15 +6,11 @@
  */
 
 #include <stdio.h>
-#include <stdarg.h>
-#include <sys/time.h>
 #include <errno.h>
 #include "sys_net.h"
-#include "sys_types.h"
 #include "sys_deps.h"
 #include "inetlib.h"
 #include "xmalloc.h"
-#include "cbls.h"
 #include "cbls_server.h"
 #include "cbls_fd.h"
 

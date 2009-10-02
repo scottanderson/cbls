@@ -5,16 +5,13 @@
  *      Author: Scott
  */
 
-#include <sys/time.h>
 #include <string.h>
-#include "sys_types.h"
 #include "sys_deps.h"
 #include "sys_net.h"
 #include "xmalloc.h"
 #include "inetlib.h"
 #include "cbls_fd.h"
 #include "cbls_server.h"
-#include "cbls.h"
 #include "cbls_protocol.h"
 
 u_int16_t ncbls_conns = 0;

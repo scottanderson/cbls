@@ -7,8 +7,6 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <sys/time.h>
-#include "sys_deps.h"
 #include "bnls.h"
 
 extern void cbls_log (const char *fmt, ...);

@@ -6,11 +6,7 @@
  */
 
 #include <string.h>
-#include "sys_types.h"
-#include "sys_net.h"
-#include "cbls.h"
 #include "cbls_server.h"
-#include "cbls_packet.h"
 #include "bnls.h"
 #include "debug.h"
 
