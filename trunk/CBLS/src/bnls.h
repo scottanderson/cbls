@@ -32,7 +32,7 @@ struct bnls_hdr {
 #define SIZEOF_BNLS_HDR		(3)
 
 #define PRODUCT_STAR (0x01)
-#define PRODUCT_SEXP (0x01)
+#define PRODUCT_SEXP (0x02)
 #define PRODUCT_W2BN (0x03)
 #define PRODUCT_D2DV (0x04)
 #define PRODUCT_D2XP (0x05)
