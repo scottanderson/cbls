@@ -40,6 +40,7 @@ void write_byte(struct packet_writer *pw, u_int8_t value);
 void write_word(struct packet_writer *pw, u_int16_t value);
 void write_dword(struct packet_writer *pw, u_int32_t value);
 void write_qword(struct packet_writer *pw, u_int64_t value);
+void write_string(struct packet_writer *pw, char *value);
 void write_end(struct packet_writer *pw);
 
 #endif /* CBLS_PACKET_H_ */

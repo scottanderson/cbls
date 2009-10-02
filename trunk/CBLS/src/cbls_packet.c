@@ -174,6 +174,15 @@ write_qword(struct packet_writer *pw, u_int64_t value) {
 }
 
 void
+write_string(struct packet_writer *pw, char *value) {
+	if(value) {
+		write_raw(pw, value, strlen(value)+1);
+	} else {
+		write_byte(pw, 0);
+	}
+}
+
+void
 write_end(struct packet_writer *pw) {
 	cbls_fd_set(pw->cbls->fd, FDW);
 
