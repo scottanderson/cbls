@@ -13,6 +13,26 @@
 
 extern void cbls_log (const char *fmt, ...);
 
+u_int32_t
+verbyte(int prod) {
+	// FIXME: don't hard-code version bytes
+	switch(prod) {
+	case PRODUCT_STAR:
+	case PRODUCT_SEXP: return 0xd3;
+	case PRODUCT_W2BN: return 0x4f;
+	case PRODUCT_D2DV:
+	case PRODUCT_D2XP: return 0x0c;
+	case PRODUCT_JSTR: return 0xa9;
+	case PRODUCT_WAR3:
+	case PRODUCT_W3XP: return 0x18;
+	case PRODUCT_DRTL:
+	case PRODUCT_DSHR: return 0x2a;
+	case PRODUCT_SSHR: return 0xa5;
+	default:
+		return -1;
+	}
+}
+
 void
 bnls_null(struct packet_reader *pr) {
 	// keep-alive
@@ -354,23 +374,9 @@ bnls_requestversionbyte(struct packet_reader *pr) {
 	}
 
 	/***/
-	// FIXME: don't hard-code version bytes
-	u_int32_t verb;
-	switch(prod) {
-	case PRODUCT_STAR:
-	case PRODUCT_SEXP: verb = 0xd3; break;
-	case PRODUCT_W2BN: verb = 0x4f; break;
-	case PRODUCT_D2DV:
-	case PRODUCT_D2XP: verb = 0x0c; break;
-	case PRODUCT_JSTR: verb = 0xa9; break;
-	case PRODUCT_WAR3:
-	case PRODUCT_W3XP: verb = 0x18; break;
-	case PRODUCT_DRTL:
-	case PRODUCT_DSHR: verb = 0x2a; break;
-	case PRODUCT_SSHR: verb = 0xa5; break;
-	default:
+	u_int32_t verb = verbyte(prod);
+	if(verb == -1)
 		prod = 0;
-	}
 
 	/**
 	 * (DWORD) Product ID (0 for error)
@@ -532,7 +538,7 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 	}
 
 	/***/
-	u_int32_t success, version, checksum, verbyte;
+	u_int32_t success, version, checksum;
 	char statstr[128];
 	memset(statstr, 0, 128);
 	success = 0;
@@ -544,7 +550,6 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 		f_game = "IX86/WAR3/war3.exe";
 		f_storm = "IX86/WAR3/Storm.dll";
 		f_snp = "IX86/WAR3/game.dll";
-		verbyte = 0x18;
 		break;
 	default:
 		f_game = 0;
@@ -594,7 +599,7 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 		write_dword(&pw, checksum);
 		write_string(&pw, statstr);
 		write_dword(&pw, cookie);
-		write_dword(&pw, verbyte);
+		write_dword(&pw, verbyte(product));
 	}
 	write_end(&pw);
 }
