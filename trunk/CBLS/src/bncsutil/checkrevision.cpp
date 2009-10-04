@@ -317,6 +317,64 @@ MEXP(int) checkRevision(const char* formula, const char* files[], int numFiles,
 	return 1;
 }
 
+MEXP(int) checkRevisionEx(const char* formula, const char* files[],
+	const char* imageFile, const char* lockdownFile, int version, unsigned long* digest)
+{
+	char pSha1Buf[20];
+	char pSha1Buf2[20];
+	char pValStr[strlen(formula)];
+	char pValStrEnc[strlen(formula)];
+	char pValStrBuffer1[0x40];
+	char pValStrBuffer2[0x40];
+	char pTempMem[16];
+	char pDigest[17];
+
+	int vs_pos, vs_i, vs_shifter, vs_adder;
+	int vs_len = strlen(formula);
+	char* vs_buffer;
+
+	vs_pos = 0;
+	while (vs_len != 0)
+	{
+
+		vs_buffer = pValStrEnc;
+		for (vs_i = 0; vs_i < vs_pos; vs_i++)
+		{
+			char b = vs_buffer[vs_i];
+			vs_buffer[vs_i] = (char)(vs_shifter - vs_buffer[vs_i]);
+			vs_shifter = (char)((((b << 8) - b) + vs_shifter) >> 8);
+		}
+
+		if (vs_shifter != 0)
+		{
+			if (vs_pos >= 0x10)
+			{
+				//die
+			}
+			vs_buffer[vs_pos++] = (char)vs_shifter;
+		}
+		vs_adder = (pValStr[vs_len - 1] - 1);
+
+		for (vs_i = 0; vs_i < vs_pos; vs_i++)
+		{
+			vs_buffer[vs_i] += vs_adder;
+			vs_adder = (vs_buffer[vs_i] < vs_adder) ? (char)1:(char)0;
+		}
+
+		if (vs_adder != 0)
+		{
+			if (vs_pos >= 0x10)
+			{
+				//die
+			}
+			vs_buffer[vs_pos++] = vs_adder;
+		}
+		vs_len--;
+	}
+	memset(vs_buffer + vs_pos, 0, 0x10 - vs_pos);
+	memcpy(vs_buffer, pValStrEnc, vs_len);
+}
+
 MEXP(int) checkRevisionFlat(const char* valueString, const char* file1,
 const char* file2, const char* file3, int mpqNumber, unsigned long* checksum)
 {
