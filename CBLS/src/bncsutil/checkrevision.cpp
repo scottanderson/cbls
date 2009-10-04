@@ -334,7 +334,7 @@ MEXP(int) checkRevisionEx(const char* formula, const char* files[],
 	char* vs_buffer;
 	char *vs_buffer1, *vs_buffer2;
 	int i;
-	char* context_state;
+	char* context;
 
 	vs_pos = 0;
 	while (vs_len != 0)
@@ -388,11 +388,13 @@ MEXP(int) checkRevisionEx(const char* formula, const char* files[],
 		vs_buffer2[i] ^= vs_buffer[i];
 	}
 
-	context_state[0] = 0x67452301;
-	context_state[1] = (uint32_t)0xefcdab89;
-	context_state[2] = (uint32_t)0x98badcfe;
-	context_state[3] = 0x10325476;
-	context_state[4] = (uint32_t)0xc3d2e1f0;
+	context[0] = 0x67452301;
+	context[1] = (uint32_t)0xefcdab89;
+	context[2] = (uint32_t)0x98badcfe;
+	context[3] = 0x10325476;
+	context[4] = (uint32_t)0xc3d2e1f0;
+
+
 }
 
 MEXP(int) checkRevisionFlat(const char* valueString, const char* file1,
