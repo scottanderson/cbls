@@ -306,9 +306,11 @@ int process_reloc_dir(t_lockdown_heap *lockdown_heap, char *baseaddr, PIMAGE_DAT
 						case IMAGE_REL_BASED_HIGHLOW:
 							edx = 4;
 							break;
+#ifdef _WIN64
 						case IMAGE_REL_BASED_DIR64:
 							edx = 8;
 							break;
+#endif
 						default:
 							return 0;						
 					}				
