@@ -21,6 +21,7 @@
   ghost@aladdin.com
 
  */
+/*$Id: md5.h,v 1.1.1.1 2001/10/18 22:50:24 jlovell Exp $ */
 /*
   Independent implementation of MD5 (RFC 1321).
 
@@ -39,9 +40,16 @@
   1999-05-03 lpd Original version.
  */
 
-#pragma once
+#ifndef md5_INCLUDED
+#  define md5_INCLUDED
 
-#define MD5_DIGEST_SIZE 16
+/*
+ * This code has some adaptations for the Ghostscript environment, but it
+ * will compile and run correctly in any environment with 8-bit chars and
+ * 32-bit ints.  Specifically, it assumes that if the following are
+ * defined, they have the same meaning as in Ghostscript: P1, P2, P3,
+ * ARCH_IS_BIG_ENDIAN.
+ */
 
 typedef unsigned char md5_byte_t; /* 8-bit byte */
 typedef unsigned int md5_word_t; /* 32-bit word */
@@ -74,11 +82,13 @@ void md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes);
 
 /* Finish the message and return the digest. */
 #ifdef P2
-void md5_finish(P2(md5_state_t *pms, md5_byte_t digest[ MD5_DIGEST_SIZE ]) );
+void md5_finish(P2(md5_state_t *pms, md5_byte_t digest[16]));
 #else
-void md5_finish(md5_state_t *pms, md5_byte_t digest[ MD5_DIGEST_SIZE] );
+void md5_finish(md5_state_t *pms, md5_byte_t digest[16]);
 #endif
 
 #ifdef __cplusplus
 }  /* end extern "C" */
 #endif
+
+#endif /* md5_INCLUDED */

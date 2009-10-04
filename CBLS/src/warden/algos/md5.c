@@ -21,6 +21,7 @@
   ghost@aladdin.com
 
  */
+/*$Id: md5.c,v 1.1.1.1 2001/10/18 22:50:24 jlovell Exp $ */
 /*
   Independent implementation of MD5 (RFC 1321).
 
@@ -28,32 +29,29 @@
   It is derived directly from the text of the RFC and not from the
   reference implementation.
 
-  The original and principal author of md5.h is L. Peter Deutsch
+  The original and principal author of md5.c is L. Peter Deutsch
   <ghost@aladdin.com>.  Other authors are noted in the change history
   that follows (in reverse chronological order):
 
   1999-11-04 lpd Edited comments slightly for automatic TOC extraction.
-  1999-10-18 lpd Fixed typo in header comment (ansi2knr rather than md5);
-	added conditionalization for C++ compilation from Martin
-	Purschke <purschke@bnl.gov>.
+  1999-10-18 lpd Fixed typo in header comment (ansi2knr rather than md5).
   1999-05-03 lpd Original version.
  */
 
-//#include <string.h>
-#include <string.h>
 #include "md5.h"
-
-#pragma intrinsic( memset, memcpy, memcmp )
+#include "string.h"
 
 #ifdef TEST
-
-#include <stdio.h>
-
-int main()
+/*
+ * Compile with -DTEST to create a self-contained executable test program.
+ * The test program should print out the same values as given in section
+ * A.5 of RFC 1321, reproduced below.
+ */
+main()
 {
     static const char *const test[7] = {
 	"", /*d41d8cd98f00b204e9800998ecf8427e*/
-	"945399884.61923487334tuvga", /*0cc175b9c0f1b6a831c399e269772661*/
+	"a", /*0cc175b9c0f1b6a831c399e269772661*/
 	"abc", /*900150983cd24fb0d6963f7d28e17f72*/
 	"message digest", /*f96b697d7cb7938d525a2f31aaf161d0*/
 	"abcdefghijklmnopqrstuvwxyz", /*c3fcd3d76192e4007dfb496cca67e13b*/
@@ -78,9 +76,27 @@ int main()
     }
     return 0;
 }
+#endif /* TEST */
 
+
+/*
+ * For reference, here is the program that computed the T values.
+ */
+#if 0
+#include <math.h>
+main()
+{
+    int i;
+    for (i = 1; i <= 64; ++i) {
+	unsigned long v = (unsigned long)(4294967296.0 * fabs(sin((double)i)));
+	printf("#define T%d 0x%08lx\n", i, v);
+    }
+    return 0;
+}
 #endif
-
+/*
+ * End of T computation program.
+ */
 #define T1 0xd76aa478
 #define T2 0xe8c7b756
 #define T3 0x242070db
