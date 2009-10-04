@@ -71,6 +71,10 @@ cbls_close (struct cbls_conn *cbls)
 		xfree(cbls->in.buf);
 	if (cbls->out.buf)
 		xfree(cbls->out.buf);
+	if (cbls->nls)
+		nls_free(cbls->nls);
+	if (cbls->new_password)
+		xfree(cbls->new_password);
 	xfree(cbls);
 	ncbls_conns--;
 }
