@@ -571,6 +571,8 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 			success = ldCheckRevision(f_game, f_storm, f_snp, checksum_formula, &version, &checksum, statstr, lockdownfile, f_img);
 			if(!success)
 				cbls_log("[%u] ldCheckRevision() failed!", cbls->uid);
+			else
+				success = strlen(statstr);
 		} else {
 			int mpqNumber = extractMPQNumber(vc_filename);
 			if(mpqNumber >= 0) {
