@@ -332,6 +332,9 @@ MEXP(int) checkRevisionEx(const char* formula, const char* files[],
 	int vs_pos, vs_i, vs_shifter, vs_adder;
 	int vs_len = strlen(formula);
 	char* vs_buffer;
+	char *vs_buffer1, *vs_buffer2;
+	int i;
+	char* context_state;
 
 	vs_pos = 0;
 	while (vs_len != 0)
@@ -373,6 +376,23 @@ MEXP(int) checkRevisionEx(const char* formula, const char* files[],
 	}
 	memset(vs_buffer + vs_pos, 0, 0x10 - vs_pos);
 	memcpy(vs_buffer, pValStrEnc, vs_len);
+
+	memset(pValStrBuffer1, 0x36, 0x40);
+	memcpy(pValStrBuffer1, vs_buffer1, 0x40);
+	memset(pValStrBuffer2, 0x5c, 0x40);
+	memcpy(pValStrBuffer2, vs_buffer2, 0x40);
+
+	for (i = 0; i < 0x10; i++)
+	{
+		vs_buffer1[i] ^= vs_buffer[i];
+		vs_buffer2[i] ^= vs_buffer[i];
+	}
+
+	context_state[0] = 0x67452301;
+	context_state[1] = (uint32_t)0xefcdab89;
+	context_state[2] = (uint32_t)0x98badcfe;
+	context_state[3] = 0x10325476;
+	context_state[4] = (uint32_t)0xc3d2e1f0;
 }
 
 MEXP(int) checkRevisionFlat(const char* valueString, const char* file1,
