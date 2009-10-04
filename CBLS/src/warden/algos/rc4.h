@@ -1,5 +1,5 @@
 /*
- * rc4.c
+ * rc4.h
  *
  * Copyright (c) 1996-2000 Whistle Communications, Inc.
  * All rights reserved.
@@ -33,8 +33,11 @@
  * THIS SOFTWARE, EVEN IF WHISTLE COMMUNICATIONS IS ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  *
- * $FreeBSD: src/sys/crypto/rc4/rc4.c,v 1.2.2.1 2000/04/18 04:48:31 archie Exp $
+ * $FreeBSD: src/sys/crypto/rc4/rc4.h,v 1.3 2000/07/16 05:53:14 peter Exp $
  */
+
+#ifndef _SYS_CRYPTO_RC4_RC4_H_
+#define _SYS_CRYPTO_RC4_RC4_H_
 
 typedef unsigned char rc4_uchar;
 
@@ -44,16 +47,8 @@ struct rc4_state {
 	rc4_uchar	index2;
 };
 
-#ifdef	__cplusplus
-extern "C" {
+extern void rc4_init(struct rc4_state *const state, const rc4_uchar *key, int keylen);
+extern void rc4_crypt(struct rc4_state *const state, rc4_uchar *buf, int buflen);
+
 #endif
 
-void
-rc4_init(struct rc4_state *const state, const rc4_uchar *key, int keylen);
-
-void
-rc4_crypt(struct rc4_state *const state, rc4_uchar *buf, int buflen);
-	
-#ifdef	__cplusplus
-}
-#endif

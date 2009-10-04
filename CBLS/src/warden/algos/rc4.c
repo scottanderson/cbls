@@ -3,7 +3,7 @@
  *
  * Copyright (c) 1996-2000 Whistle Communications, Inc.
  * All rights reserved.
- * 
+ *
  * Subject to the following obligations and disclaimer of warranty, use and
  * redistribution of this software, in source or object code forms, with or
  * without modifications are expressly permitted by Whistle Communications;
@@ -14,7 +14,7 @@
  *    Communications, Inc. trademarks, including the mark "WHISTLE
  *    COMMUNICATIONS" on advertising, endorsements, or otherwise except as
  *    such appears in the above copyright notice or in the software.
- * 
+ *
  * THIS SOFTWARE IS BEING PROVIDED BY WHISTLE COMMUNICATIONS "AS IS", AND
  * TO THE MAXIMUM EXTENT PERMITTED BY LAW, WHISTLE COMMUNICATIONS MAKES NO
  * REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, REGARDING THIS SOFTWARE,
@@ -36,10 +36,8 @@
  * $FreeBSD: src/sys/crypto/rc4/rc4.c,v 1.2.2.1 2000/04/18 04:48:31 archie Exp $
  */
 
-//#include<string.h>
+#include <string.h>
 #include "rc4.h"
-
-#pragma intrinsic( memset, memcpy, memcmp )
 
 static __inline void
 swap_bytes( rc4_uchar *a, rc4_uchar *b)
@@ -63,15 +61,15 @@ rc4_init(struct rc4_state *const state, const rc4_uchar *key, int keylen)
 	/* Initialize state with identity permutation */
 	for (i = 0; i < 256; i++)
 	{
-		state->perm[i] = (rc4_uchar)i; 
+		state->perm[i] = (rc4_uchar)i;
 	}
 	state->index1 = 0;
 	state->index2 = 0;
-  
+
 	/* Randomize the permutation using key data */
 	for (j = i = 0; i < 256; i++)
 	{
-		j += state->perm[i] + key[i % keylen] & 255; 
+		j += state->perm[i] + key[i % keylen] & 255;
 		swap_bytes(&state->perm[i], &state->perm[j]);
 	}
 }
