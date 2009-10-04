@@ -594,6 +594,10 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 		cbls_log("[%u] unknown product %u", cbls->uid, productid);
 	}
 
+    u_int32_t vb = verbyte(productid);
+    if(vb == -1)
+    	success = 0;
+
 	/**
 	 * (BOOLEAN) Success
 	 *
@@ -618,7 +622,7 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 		write_dword(&pw, checksum);
 		write_string(&pw, statstr);
 		write_dword(&pw, cookie);
-		write_dword(&pw, verbyte(productid));
+		write_dword(&pw, vb);
 	}
 	write_end(&pw);
 }
