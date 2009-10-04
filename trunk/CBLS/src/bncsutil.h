@@ -36,5 +36,5 @@
 #endif /* __cplusplus */
 #include "bncsutil/nls.h" /* New Logon System */
 #include "bncsutil/libinfo.h" /* BNCSutil Library Information */
-
+#include "lockdown/lockdown.h"
 #endif /* BNCSUTIL_BNCSUTIL_H_INCLUDED */
