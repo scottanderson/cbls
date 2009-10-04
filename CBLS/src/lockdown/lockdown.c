@@ -87,7 +87,7 @@ int get_digit(char *filename)
 	return digit_1;
 }
 
-int CheckRevision(char *path_file1, char *path_file2, char *path_file3, char *valuestring, int *version, int *checksum, char digest[0x11], char *lockdownfile, char *imagedump)
+int ldCheckRevision(char *path_file1, char *path_file2, char *path_file3, char *valuestring, int *version, int *checksum, char digest[0x11], char *lockdownfile, char *imagedump)
 {
 	LD_SHA1_CTX ctx;
 	int return_is_valid = 1, module_offset = 0, seed, i; 
@@ -358,7 +358,6 @@ int process_section(LD_SHA1_CTX *ctx, t_lockdown_heap *lockdown_heap, char *base
 		{
 			char *starting_memory = baseaddr + virtual_addr;
 			char *ptr_memory = baseaddr + virtual_addr;
-			int i = 0;			
 			int memory_offset = index * 4;				
 			do
 			{

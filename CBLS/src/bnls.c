@@ -523,8 +523,10 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 	u_int32_t flags;
 	u_int32_t cookie;
 	u_int64_t timestamp;
-	char *vc_filename;
+	char *vc_filename, ld_filename[20];
 	char *checksum_formula;
+	int ld_version, ld_checksum;
+	char ld_digest[0x11];
 
 	if(!read_dword(pr, &productid)
 	|| !read_dword(pr, &flags)
@@ -543,8 +545,14 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 	memset(statstr, 0, 128);
 	success = 0;
 
-	char *f_game, *f_storm, *f_snp;
+	char *f_game, *f_storm, *f_snp, *f_img;
 	switch(productid) {
+	case PRODUCT_W2BN:
+		f_game = "IX86/W2BN/Warcraft II BNE.exe";
+		f_storm = "IX86/W2BN/Storm.dll";
+		f_snp = "IX86/W2BN/Battle.snp";
+		f_img = "IX86/W2BN/W2BN.bin";
+		break;
 	case PRODUCT_WAR3:
 	case PRODUCT_W3XP:
 		f_game = "IX86/WAR3/war3.exe";
@@ -556,20 +564,37 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 	}
 
 	if(f_game != 0) {
-		int mpqNumber = extractMPQNumber(vc_filename);
-		if(mpqNumber >= 0) {
-			success = checkRevisionFlat(
-					checksum_formula, f_game, f_storm, f_snp, mpqNumber, &checksum);
-			if(success) {
-				success = getExeInfo(
-						f_game, statstr, 128, &version, BNCSUTIL_PLATFORM_X86);
-				if(!success)
-					cbls_log("[%u] getExeInfo() failed", cbls->uid);
+		if(productid == PRODUCT_W2BN) {
+			char lockdownfile[128];
+			memset(ld_filename, 0, 20);
+			strncpy(ld_filename, vc_filename, 16);
+			strcat(ld_filename, ".dll");
+			strcpy(lockdownfile, "lockdown/");
+			strcat(lockdownfile, ld_filename);
+
+			if(ldCheckRevision(f_game, f_storm, f_snp, checksum_formula, &ld_version, &ld_checksum, ld_digest, lockdownfile, f_img))
+			{
+				success = 1;
 			} else {
-				cbls_log("[%u] checkRevision() failed", cbls->uid);
+				cbls_log("[%u] ldCheckRevision() failed!", cbls->uid);
+				success = 0;
 			}
 		} else {
-			cbls_log("[%u] failed to extract mpq number from %s", cbls->uid, vc_filename);
+			int mpqNumber = extractMPQNumber(vc_filename);
+			if(mpqNumber >= 0) {
+				success = checkRevisionFlat(
+						checksum_formula, f_game, f_storm, f_snp, mpqNumber, &checksum);
+				if(success) {
+					success = getExeInfo(
+							f_game, statstr, 128, &version, BNCSUTIL_PLATFORM_X86);
+					if(!success)
+						cbls_log("[%u] getExeInfo() failed", cbls->uid);
+				} else {
+					cbls_log("[%u] checkRevision() failed", cbls->uid);
+				}
+			} else {
+				cbls_log("[%u] failed to extract mpq number from %s", cbls->uid, vc_filename);
+			}
 		}
 	} else {
 		cbls_log("[%u] unknown product %u", cbls->uid, productid);
@@ -595,9 +620,16 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 	if(!success) {
 		write_dword(&pw, cookie);
 	} else {
-		write_dword(&pw, version);
-		write_dword(&pw, checksum);
-		write_string(&pw, statstr);
+		if(productid == PRODUCT_W2BN) {
+			write_dword(&pw, ld_version);
+			write_dword(&pw, ld_checksum);
+			write_string(&pw, ld_digest);
+		} else {
+			write_dword(&pw, version);
+			write_dword(&pw, checksum);
+			write_string(&pw, statstr);
+		}
+
 		write_dword(&pw, cookie);
 		write_dword(&pw, verbyte(productid));
 	}

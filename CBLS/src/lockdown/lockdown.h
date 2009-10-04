@@ -21,6 +21,6 @@ THE SOFTWARE. */
 #ifndef __MY_LOCKDOWN_H__
 #define __MY_LOCKDOWN_H__
 
-int CheckRevision(char *path_file1, char *path_file2, char *path_file3, char *valuestring, int *version, int *checksum, char digest[0x11], char *lockdownfile, char *imagedump);
+int ldCheckRevision(char *path_file1, char *path_file2, char *path_file3, char *valuestring, int *version, int *checksum, char digest[0x11], char *lockdownfile, char *imagedump);
 
 #endif
