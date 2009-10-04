@@ -29,21 +29,16 @@
    The copyright notice above is copied from md5.h by L. Peter Deutsch
    <ghost@aladdin.com>. Thank him since I'm not a good speaker of English. :)
  */
-
 #include <string.h>
 #include "sha1.h"
 
-#pragma intrinsic( memset, memcpy, memcmp )
-
-
-#define	INLINE	
+#define	INLINE	inline
 /*
  * Packing bytes to a word
  *
  * Should not assume p is aligned to word boundary
  */
- 
-static sha1_word_t packup( const sha1_byte_t *p)
+static INLINE sha1_word_t packup(sha1_byte_t *p)
 {
   /* Portable, but slow */
   return p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3] << 0;
@@ -65,7 +60,7 @@ static void unpackup(sha1_byte_t *p, sha1_word_t q)
 /*
  * Processing a block
  */
-static void sha1_update_now(sha1_state_s *pms, const sha1_byte_t *bp)
+static inline void sha1_update_now(sha1_state_s *pms, sha1_byte_t *bp)
 {
   sha1_word_t	tmp, a, b, c, d, e, w[16+16];
   int	i, s;
@@ -165,7 +160,7 @@ void	sha1_init(sha1_state_s *pms)
 /*
  * Fill block and update output when needed
  */
-void	sha1_update(sha1_state_s *pms, const sha1_byte_t *bufp, int length)
+void	sha1_update(sha1_state_s *pms, sha1_byte_t *bufp, int length)
 {
   /* Is the buffer partially filled? */
   if(pms->sha1_count != 0) {

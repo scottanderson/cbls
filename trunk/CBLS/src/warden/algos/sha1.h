@@ -56,7 +56,7 @@ extern "C" {
 void	sha1_init(sha1_state_s *pms);
 
 /* Append a string to SHA-1 algorithm */
-void	sha1_update(sha1_state_s *pms, const sha1_byte_t *input_buffer, int length);
+void	sha1_update(sha1_state_s *pms, sha1_byte_t *input_buffer, int length);
 
 /* Finish the SHA-1 algorithm and return the hash */
 void	sha1_finish(sha1_state_s *pms, sha1_byte_t output[SHA1_OUTPUT_SIZE]);
