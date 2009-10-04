@@ -13,6 +13,10 @@
 
 extern void cbls_log (const char *fmt, ...);
 
+/*** NLS Variables ***/
+nls_t *nls, *old_nls;
+char *nls_new_pass;
+
 u_int32_t
 verbyte(int prod) {
 	// FIXME: don't hard-code version bytes
@@ -86,84 +90,243 @@ bnls_cdkey(struct packet_reader *pr) {
 
 void
 bnls_logonchallenge(struct packet_reader *pr) {
+	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (STRING) Account Name
 	 * (STRING) Password
 	 */
+	char *account_name, *account_pass;
+
+	if(!(account_name = read_string(pr))
+	|| !(account_pass = read_string(pr))) {
+		cbls_close(cbls);
+		return;
+	}
+
+	/***/
+	char *var_a;
+
+	if (nls != 0) { //NLS Already Initialized by Createaccount
+		nls_get_A(nls, var_a);
+	} else {
+		nls = nls_init(account_name, account_pass);
+		if(nls != 0) {
+			nls_get_A(nls, var_a);
+		} else {
+			cbls_log("[%u] nls_init() failed", cbls->uid);
+		}
+	}
 
 	/**
 	 * (DWORD[8]) Data for SID_AUTH_ACCOUNTLOGON
 	 */
+	struct packet_writer pw;
+	write_init(&pw, cbls, BNLS_LOGONCHALLENGE, 32);
+	write_raw(&pw, var_a, 32);
+	write_end(&pw);
 }
 
 void
 bnls_logonproof(struct packet_reader *pr) {
+	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (DWORD[16]) Data from SID_AUTH_ACCOUNTLOGON
 	 */
+	char *salt, *var_b;
+
+	if(!read_raw(pr, &salt, 32)
+	|| !read_raw(pr, &var_b, 32))
+	{
+		cbls_close(cbls);
+		return;
+	}
+
+	/***/
+	char *m1;
+
+	if(nls != 0)
+	{
+		nls_get_M1(nls, m1, var_b, salt);
+	} else {
+		cbls_log("[%u] nls_get_m1() nls never initialized properly", cbls->uid);
+	}
 
 	/**
 	 * (DWORD[5]) Data for SID_AUTH_ACCOUNTLOGONPROOF
 	 */
+	struct packet_writer pw;
+	write_init(&pw, cbls, BNLS_LOGONPROOF, 20);
+	write_raw(&pw, m1, 20);
+	write_end(&pw);
 }
 
 void
 bnls_createaccount(struct packet_reader *pr) {
+	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (STRING) Account Name
 	 * (STRING) Password
 	 */
+	char *account_name, *account_pass;
+
+	if(!(account_name = read_string(pr))
+	|| !(account_pass = read_string(pr)))
+	{
+		cbls_close(cbls);
+		return;
+	}
+
+	/***/
+	char *result;
+	unsigned long buf_len;
+
+	nls = nls_init(account_name, account_pass);
+	if(nls != 0) {
+		buf_len = strlen(account_name) + 65;
+		nls_account_create(nls, result, buf_len);
+	} else {
+		cbls_log("[%u] nls_account_create() nls not initialized properly", cbls->uid);
+	}
 
 	/**
 	 * (DWORD[16]) Data for SID_AUTH_ACCOUNTCREATE
 	 */
+	struct packet_writer pw;
+	write_init(&pw, cbls, BNLS_CREATEACCOUNT, 64);
+	write_raw(&pw, result, 64);
+	write_end(&pw);
 }
 
 void
 bnls_changechallenge(struct packet_reader *pr) {
+	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (STRING) Account Name
 	 * (STRING) Account's Old Password
 	 * (STRING) Account's New Password
 	 */
+	char *account_name, *account_old_pass, *account_new_pass;
+
+	if(!(account_name = read_string(pr))
+	|| !(account_old_pass = read_string(pr))
+	|| !(account_new_pass = read_string(pr)))
+	{
+		cbls_close(cbls);
+		return;
+	}
+
+	/***/
+	char *var_a;
+	if(nls != 0) {
+		nls_get_A(nls, var_a);
+	} else {
+		nls = nls_init(account_name, account_old_pass);
+		if(nls != 0) {
+			nls_get_A(nls, var_a);
+			nls_new_pass = account_new_pass;
+
+		} else {
+			cbls_log("[%u] BNLS_CHANGECHALLENGE: nls_get_A() nls not initialized properly", cbls->uid);
+		}
+	}
 
 	/**
 	 * (DWORD[8]) Data for SID_AUTH_ACCOUNTCHANGE
 	 */
+	struct packet_writer pw;
+	write_init(&pw, cbls, BNLS_CHANGECHALLENGE, 32);
+	write_raw(&pw, var_a, 32);
+	write_end(&pw);
 }
 
 void
 bnls_changeproof(struct packet_reader *pr) {
+	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (DWORD[16]) Data from SID_AUTH_ACCOUNTCHANGE
 	 */
+	char *salt, *server_key;
 
+	if(!read_raw(pr, &salt, 32)
+	|| !read_raw(pr, &server_key, 32))
+	{
+		cbls_close(cbls);
+		return;
+	}
+
+	/***/
+	char *result;
+
+	if(nls != 0) {
+		old_nls = nls;
+		nls = nls_account_change_proof(old_nls, result, nls_new_pass, server_key, salt);
+		if(nls == 0) {
+			cbls_log("[%u] BNLS_CHANGEPROOF: nls_account_change_proof() nls not initialized properly", cbls->uid);
+		}
+	}
 	/**
 	 * (DWORD[21]) Data for SID_AUTH_ACCOUNTCHANGEPROOF
 	 */
+	struct packet_writer pw;
+	write_init(&pw, cbls, BNLS_CHANGEPROOF, 84);
+	write_raw(&pw, result, 84);
+	write_end(&pw);
 }
 
 void
 bnls_upgradechallenge(struct packet_reader *pr) {
+	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (STRING) Account Name
 	 * (STRING) Account's Old Password
-	 * (STRING) Account's New Password (May be identical to old password, but still must be provided.)
+	 * (STRING) Account's New Password (May be identical to old password, but still must be provided.) WHOEVER THOUGHT OF THIS PACKET SPEC IS RETARDED
 	 */
+	char *account_name, *account_old_pass, *account_new_pass;
 
+	if(!(account_name = read_string(pr))
+	|| !(account_old_pass = read_string(pr))
+	|| !(account_new_pass = read_string(pr)))
+	{
+		cbls_close(cbls);
+		return;
+	}
+
+	/***/
+	nls = nls_init(account_name, account_old_pass);
+	if(nls == 0) {
+		cbls_log("[%u] BNLS_UPGRADECHALLENGE: nls_init() failed to initialize", cbls->uid);
+	}
 	/**
 	 * (BOOLEAN) Success code
 	 */
+	struct packet_writer pw;
+	write_init(&pw, cbls, BNLS_UPGRADECHALLENGE, 4);
+	write_dword(&pw, 1);
+	write_end(&pw);
 }
 
 void
 bnls_upgradeproof(struct packet_reader *pr) {
+	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (DWORD)    Client Token
 	 * (DWORD[5]) Old Password Hash
 	 * (DWORD[8]) New Password Salt
 	 * (DWORD[8]) New Password Verifier
 	 */
+	u_int32_t client_token;
+	char *old_pw_hash, *new_pw_salt, *new_pw_verifier;
+
+	if(!read_dword(pr, &client_token)
+	|| !read_raw(pr, &old_pw_hash, 20)
+	|| !read_raw(pr, &new_pw_salt, 32)
+	|| !read_raw(pr, &new_pw_verifier, 32))
+	{
+		cbls_close(cbls);
+		return;
+	}
+
+	/***/
 
 	/**
 	 * (DWORD[22]) Data for SID_AUTH_ACCOUNTUPGRADEPROOF
@@ -172,11 +335,93 @@ bnls_upgradeproof(struct packet_reader *pr) {
 
 void
 bnls_versioncheck(struct packet_reader *pr) {
+	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (DWORD)  Product ID
 	 * (DWORD)  Version DLL digit in the range 0-7 (For example, for IX86Ver1.mpq, the digit is 1)
 	 * (STRING) Checksum Formula
 	 */
+	u_int32_t product_id, version_dll;
+	char *checksum_formula;
+
+	if(!read_dword(pr, &product_id)
+	|| !read_dword(pr, &version_dll)
+	|| !(checksum_formula = read_string(pr)))
+	{
+		cbls_close(cbls);
+		return;
+	}
+
+	/***/
+	u_int32_t success, version, checksum;
+	char *f_game, *f_storm, *f_snp, *f_img;
+	char statstr[128];
+
+	memset(statstr, 0, 128);
+	success = 0;
+
+	switch(product_id) {
+	case PRODUCT_STAR:
+	case PRODUCT_SEXP:
+		f_game = "IX86/STAR/Starcraft.exe";
+		f_storm = "IX86/STAR/Storm.dll";
+		f_snp = "IX86/STAR/Battle.snp";
+		f_img = "IX86/STAR/STAR.bin";
+		break;
+	case PRODUCT_W2BN:
+		f_game = "IX86/W2BN/Warcraft II BNE.exe";
+		f_storm = "IX86/W2BN/Storm.dll";
+		f_snp = "IX86/W2BN/Battle.snp";
+		f_img = "IX86/W2BN/W2BN.bin";
+		break;
+	case PRODUCT_D2DV:
+		f_game = "IX86/D2DV/Game.exe";
+		f_storm = "IX86/D2DV/BNClient.dll";
+		f_snp = "IX86/D2DV/D2Client.dll";
+		break;
+	case PRODUCT_D2XP:
+		f_game = "IX86/D2XP/Game.exe";
+		f_storm = "IX86/D2XP/BNClient.dll";
+		f_snp = "IX86/D2XP/D2Client.dll";
+		break;
+	case PRODUCT_WAR3:
+	case PRODUCT_W3XP:
+		f_game = "IX86/WAR3/war3.exe";
+		f_storm = "IX86/WAR3/Storm.dll";
+		f_snp = "IX86/WAR3/game.dll";
+		break;
+	default:
+		f_game = 0;
+	}
+
+	if(product_id == PRODUCT_STAR || product_id == PRODUCT_SEXP || product_id == PRODUCT_W2BN) {
+		char lockdownfile[128];
+		strcpy(lockdownfile, "lockdown/lockdown-IX86-");
+		strcat(lockdownfile, (char)version_dll);
+		strcat(lockdownfile, ".dll");
+		if (f_game != 0) {
+			success = ldCheckRevision(f_game, f_storm, f_snp, checksum_formula, &version, &checksum, statstr, lockdownfile, f_img);
+			if(!success)
+				cbls_log("[%u] ldCheckRevision() failed!", cbls->uid);
+			else
+				success = strlen(statstr);
+		}
+	} else {
+		if(version_dll >= 0) {
+			success = checkRevisionFlat(
+					checksum_formula, f_game, f_storm, f_snp, version_dll, &checksum);
+			if(success) {
+				success = getExeInfo(
+						f_game, statstr, 128, &version, BNCSUTIL_PLATFORM_X86);
+				if(!success)
+					cbls_log("[%u] getExeInfo() failed", cbls->uid);
+			} else {
+				cbls_log("[%u] checkRevision() failed", cbls->uid);
+			}
+		} else {
+			cbls_log("[%u] BNLS_VERSIONCHECK: bad mpqnumber", cbls->uid, version_dll);
+		}
+	}
 
 	/**
 	 * (BOOLEAN) Success
@@ -186,6 +431,16 @@ bnls_versioncheck(struct packet_reader *pr) {
 	 * (DWORD)  Checksum
 	 * (STRING) Version check stat string
 	 */
+	struct packet_writer pw;
+	// success contains strlen(statstr)
+	write_init(&pw, cbls, BNLS_VERSIONCHECK, (success == 0) ? 8 : 21 + success);
+	write_dword(&pw, !!success);
+	if(success > 0) {
+		write_dword(&pw, version);
+		write_dword(&pw, checksum);
+		write_string(&pw, statstr);
+	}
+	write_end(&pw);
 }
 
 void
