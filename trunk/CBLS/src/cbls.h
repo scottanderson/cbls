@@ -11,6 +11,7 @@
 #include <sys/time.h>
 #include "sys_net.h"
 #include "qbuf.h"
+#include "bncsutil/nls.h"
 
 struct cbls_conn {
 	struct cbls_conn *next, *prev;
@@ -26,6 +27,8 @@ struct cbls_conn {
 	struct timeval idle_tv;
 
 	u_int32_t nls_rev;
+	nls_t *nls;
+	char *new_password;
 };
 
 struct cbls_conn *cbls_new (void);
