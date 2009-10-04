@@ -166,8 +166,7 @@ bnls_createaccount(struct packet_reader *pr) {
 	char *account_name, *account_pass;
 
 	if(!(account_name = read_string(pr))
-	|| !(account_pass = read_string(pr)))
-	{
+	|| !(account_pass = read_string(pr))) {
 		cbls_close(cbls);
 		return;
 	}
@@ -309,6 +308,7 @@ bnls_upgradechallenge(struct packet_reader *pr) {
 		cbls_close(cbls);
 		return;
 	}
+
 	/**
 	 * (BOOLEAN) Success code
 	 */
@@ -333,13 +333,15 @@ bnls_upgradeproof(struct packet_reader *pr) {
 	if(!read_dword(pr, &client_token)
 	|| !read_raw(pr, &old_pw_hash, 20)
 	|| !read_raw(pr, &new_pw_salt, 32)
-	|| !read_raw(pr, &new_pw_verifier, 32))
-	{
+	|| !read_raw(pr, &new_pw_verifier, 32)) {
 		cbls_close(cbls);
 		return;
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_UPGRADEPROOF unimplemented", cbls->uid);
+	cbls_close(cbls);
+	return;
 
 	/**
 	 * (DWORD[22]) Data for SID_AUTH_ACCOUNTUPGRADEPROOF
@@ -458,9 +460,15 @@ bnls_versioncheck(struct packet_reader *pr) {
 
 void
 bnls_confirmlogon(struct packet_reader *pr) {
+	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (DWORD[5]) Password proof from Battle.net
 	 */
+
+	/***/
+	cbls_log("[%u] BNLS_CONFIRMLOGON unimplemented", cbls->uid);
+	cbls_close(cbls);
+	return;
 
 	/**
 	 * (BOOLEAN) Success
@@ -538,6 +546,7 @@ bnls_hashdata(struct packet_reader *pr) {
 
 void
 bnls_cdkey_ex(struct packet_reader *pr) {
+	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (DWORD)    Cookie. This value has no special meaning to the server and will simply be echoed to the client in the response.
 	 * (BYTE)     Amount of CD-keys to encrypt. Must be between 1 and 32.
@@ -546,6 +555,11 @@ bnls_cdkey_ex(struct packet_reader *pr) {
 	 * (DWORD[])  Client session key(s) (optional; check flags)
 	 * (STRING[]) CD-keys. No dashes or spaces. The client can use multiple types of CD-keys in the same packet.
 	 */
+
+	/***/
+	cbls_log("[%u] BNLS_CDKEY_EX unimplemented", cbls->uid);
+	cbls_close(cbls);
+	return;
 
 	/**
 	 * (DWORD) Cookie
@@ -702,12 +716,18 @@ bnls_reserveserverslots(struct packet_reader *pr) {
 
 void
 bnls_serverlogonchallenge(struct packet_reader *pr) {
+	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (DWORD)     Slot Index
 	 * (DWORD)     NLS Revision Number
 	 * (DWORD[16]) Data from Account Database
 	 * (DWORD[8])  Data from SID_AUTH_ACCOUNTLOGON
 	 */
+
+	/***/
+	cbls_log("[%u] BNLS_SERVERLOGONCHALLENGE unimplemented", cbls->uid);
+	cbls_close(cbls);
+	return;
 
 	/**
 	 * (DWORD)     Slot index
@@ -717,11 +737,17 @@ bnls_serverlogonchallenge(struct packet_reader *pr) {
 
 void
 bnls_serverlogonproof(struct packet_reader *pr) {
+	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (DWORD)    Slot Index
 	 * (DWORD[5]) Data from SID_AUTH_ACCOUNTLOGONPROOF
 	 * (STRING)   The client's Account Name
 	 */
+
+	/***/
+	cbls_log("[%u] BNLS_SERVERLOGONPROOF unimplemented", cbls->uid);
+	cbls_close(cbls);
+	return;
 
 	/**
 	 * (DWORD)    Slot index.
@@ -756,6 +782,9 @@ bnls_versioncheckex(struct packet_reader *pr) {
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_VERSIONCHECKEX unimplemented", cbls->uid);
+	cbls_close(cbls);
+	return;
 
 	/**
 	 * (BOOLEAN) Success
