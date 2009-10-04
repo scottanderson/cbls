@@ -599,7 +599,7 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 		write_dword(&pw, checksum);
 		write_string(&pw, statstr);
 		write_dword(&pw, cookie);
-		write_dword(&pw, verbyte(product));
+		write_dword(&pw, verbyte(productid));
 	}
 	write_end(&pw);
 }
