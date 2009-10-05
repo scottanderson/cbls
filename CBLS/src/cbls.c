@@ -101,7 +101,7 @@ cbls_read (int fd)
 #else
 		if (r == 0 || (r < 0 && err != EWOULDBLOCK && err != EINTR)) {
 #endif
-			cbls_log("[%u] cbls_read; %d %s", cbls->uid, r, strerror(errno));
+			/*cbls_log("[%u] cbls_read; %d %s", cbls->uid, r, strerror(errno));*/
 			cbls_close(cbls);
 		}
 	} else {

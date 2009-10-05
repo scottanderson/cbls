@@ -15,6 +15,25 @@
 
 extern void cbls_log (const char *fmt, ...);
 
+char *
+gamestr(int prod) {
+	switch(prod) {
+	case PRODUCT_STAR: return "STAR";
+	case PRODUCT_SEXP: return "SEXP";
+	case PRODUCT_W2BN: return "W2BN";
+	case PRODUCT_D2DV: return "D2DV";
+	case PRODUCT_D2XP: return "D2XP";
+	case PRODUCT_JSTR: return "JSTR";
+	case PRODUCT_WAR3: return "WAR3";
+	case PRODUCT_W3XP: return "W3XP";
+	case PRODUCT_DRTL: return "DRTL";
+	case PRODUCT_DSHR: return "DSHR";
+	case PRODUCT_SSHR: return "SSHR";
+	default:
+		return 0;
+	}
+}
+
 u_int32_t
 verbyte(int prod) {
 	// FIXME: don't hard-code version bytes
@@ -57,6 +76,7 @@ bnls_cdkey(struct packet_reader *pr) {
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_CDKEY %s", cbls->uid, cdkey);
 	u_int32_t result;
 	u_int32_t client_token = (u_int32_t)rand();
 	u_int32_t hash[9];
@@ -102,6 +122,7 @@ bnls_logonchallenge(struct packet_reader *pr) {
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_LOGONCHALLENGE %s %s", cbls->uid, account_name, account_pass);
 	char var_a[32];
 
 	if (cbls->nls)
@@ -138,6 +159,7 @@ bnls_logonproof(struct packet_reader *pr) {
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_LOGONPROOF", cbls->uid);
 	char *m1;
 
 	if(!cbls->nls) {
@@ -172,6 +194,7 @@ bnls_createaccount(struct packet_reader *pr) {
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_CREATEACCOUNT %s %s", cbls->uid, account_name, account_pass);
 	char result[97]; // 64 bytes for result, 32 for username, one for null
 
 	if(cbls->nls)
@@ -216,6 +239,7 @@ bnls_changechallenge(struct packet_reader *pr) {
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_CHANGECHALLENGE %s %s %s", cbls->uid, account_name, account_old_pass, account_new_pass);
 	char var_a[32];
 	if(cbls->nls)
 		nls_free(cbls->nls);
@@ -252,6 +276,7 @@ bnls_changeproof(struct packet_reader *pr) {
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_CHANGEPROOF", cbls->uid);
 	char *result;
 
 	if(!cbls->nls) {
@@ -300,6 +325,7 @@ bnls_upgradechallenge(struct packet_reader *pr) {
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_UPGRADECHALLENGE %s %s %s", cbls->uid, account_name, account_old_pass, account_new_pass);
 	if(cbls->nls)
 		nls_free(cbls->nls);
 	cbls->nls = nls_init(account_name, account_old_pass);
@@ -368,6 +394,7 @@ bnls_versioncheck(struct packet_reader *pr) {
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_VERSIONCHECK %s %u", cbls->uid, gamestr(product_id), version_dll);
 	u_int32_t success, version, checksum;
 	char *f_game, *f_storm, *f_snp, *f_img;
 	char statstr[128];
@@ -518,6 +545,7 @@ bnls_hashdata(struct packet_reader *pr) {
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_HASHDATA", cbls->uid);
 	u_int32_t hash[5];
 	calcHashBuf(data, data_len, (void*)hash);
 	if(flags & 0x02) {
@@ -585,6 +613,9 @@ bnls_choosenlsrevision(struct packet_reader *pr) {
 		return;
 	}
 
+	/**/
+	cbls_log("[%u] BNLS_CHOOSENLSREVISION %u", cbls->uid, nls_rev);
+
 	/**
 	 * (BOOLEAN) Success code
 	 */
@@ -614,7 +645,7 @@ bnls_authorize(struct packet_reader *pr) {
 	}
 
 	/***/
-	cbls_log("[%u] logging in as %s", cbls->uid, botid);
+	cbls_log("[%u] BNLS_AUTHORIZE %s", cbls->uid, botid);
 
 	/**
 	 * (BOOLEAN) Server code
@@ -633,7 +664,7 @@ bnls_authorizeproof(struct packet_reader *pr) {
 	 */
 
 	/***/
-	cbls_log("[%u] login success", cbls->uid);
+	cbls_log("[%u] BNLS_AUTHORIZEPROOF success", cbls->uid);
 
 	/**
 	 * (DWORD) Status code (0=Authorized, 1=Unauthorized)
@@ -656,6 +687,7 @@ bnls_requestversionbyte(struct packet_reader *pr) {
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_REQUESTVERBYTE %s", cbls->uid, gamestr(prod));
 	u_int32_t verb = verbyte(prod);
 	if(verb == -1)
 		prod = 0;
@@ -683,6 +715,7 @@ bnls_verifyserver(struct packet_reader *pr) {
 	 */
 
 	/***/
+	cbls_log("[%u] BNLS_VERIFYSERVER unimplemented", cbls->uid);
 	u_int32_t success = 0;
 
 	/**
@@ -703,6 +736,7 @@ bnls_reserveserverslots(struct packet_reader *pr) {
 	 */
 
 	/***/
+	cbls_log("[%u] BNLS_RESERVESERVERSLOTS unimplemented", cbls->uid);
 	u_int32_t slots = 0;
 
 	/**
@@ -835,6 +869,7 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_VERSIONCHECKEX2 %s %s", cbls->uid, gamestr(productid), vc_filename);
 	u_int32_t success, version, checksum;
 	char statstr[128];
 	memset(statstr, 0, 128);
@@ -952,6 +987,7 @@ bnls_warden(struct packet_reader *pr) {
 	}
 
 	/***/
+	cbls_log("[%u] BNLS_WARDEN unimplemented", cbls->uid);
 
 	/**
 	 * (BYTE)  Usage
