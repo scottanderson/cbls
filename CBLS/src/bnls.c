@@ -82,7 +82,7 @@ bnls_cdkey(struct packet_reader *pr) {
 	u_int32_t hash[9];
 
 	result = !kd_quick(cdkey, client_token, server_token,
-			&hash[2], &hash[1], (void*)&hash[4], 20);
+			&hash[2], &hash[1], (char*)&hash[4], 20);
 
 	if(result) {
 		// Success
@@ -150,10 +150,10 @@ bnls_logonproof(struct packet_reader *pr) {
 	/**
 	 * (DWORD[16]) Data from SID_AUTH_ACCOUNTLOGON
 	 */
-	char *salt, *var_b;
+	char salt[32], var_b[32];
 
-	if(!read_raw(pr, &salt, 32)
-	|| !read_raw(pr, &var_b, 32)) {
+	if(!read_raw(pr, salt, 32)
+	|| !read_raw(pr, var_b, 32)) {
 		cbls_close(cbls);
 		return;
 	}
@@ -267,10 +267,10 @@ bnls_changeproof(struct packet_reader *pr) {
 	/**
 	 * (DWORD[16]) Data from SID_AUTH_ACCOUNTCHANGE
 	 */
-	char *salt, *server_key;
+	char salt[32], server_key[32];
 
-	if(!read_raw(pr, &salt, 32)
-	|| !read_raw(pr, &server_key, 32)) {
+	if(!read_raw(pr, salt, 32)
+	|| !read_raw(pr, server_key, 32)) {
 		cbls_close(cbls);
 		return;
 	}
@@ -354,12 +354,12 @@ bnls_upgradeproof(struct packet_reader *pr) {
 	 * (DWORD[8]) New Password Verifier
 	 */
 	u_int32_t client_token;
-	char *old_pw_hash, *new_pw_salt, *new_pw_verifier;
+	u_int32_t old_pw_hash[5], new_pw_salt[8], new_pw_verifier[8];
 
 	if(!read_dword(pr, &client_token)
-	|| !read_raw(pr, &old_pw_hash, 20)
-	|| !read_raw(pr, &new_pw_salt, 32)
-	|| !read_raw(pr, &new_pw_verifier, 32)) {
+	|| !read_raw(pr, old_pw_hash, 20)
+	|| !read_raw(pr, new_pw_salt, 32)
+	|| !read_raw(pr, new_pw_verifier, 32)) {
 		cbls_close(cbls);
 		return;
 	}
@@ -441,7 +441,7 @@ bnls_versioncheck(struct packet_reader *pr) {
 		|| (product_id == PRODUCT_SEXP)
 		|| (product_id == PRODUCT_W2BN)) {
 			char lockdownfile[32];
-			snprintf(lockdownfile, 128, "lockdown/lockdown-IX86-%u.dll", version_dll);
+			snprintf(lockdownfile, 32, "lockdown/lockdown-IX86-%u.dll", version_dll);
 			success = ldCheckRevision(f_game, f_storm, f_snp, checksum_formula, &version, &checksum, statstr, lockdownfile, f_img);
 			if(!success)
 				cbls_log("[%u] ldCheckRevision() failed!", cbls->uid);
