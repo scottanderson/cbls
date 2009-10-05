@@ -35,7 +35,7 @@ int process_resource_directory_entry(PIMAGE_RESOURCE_DIRECTORY res_start, PIMAGE
 
 int pe_get_version(char *filename)
 {       
-	int i, version;	
+	int version;
 	PIMAGE_SECTION_HEADER section;	
 	PIMAGE_RESOURCE_DIRECTORY resource;  
 	char *data = pe_load(filename);	  		

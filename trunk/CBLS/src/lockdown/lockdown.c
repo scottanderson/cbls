@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -87,7 +88,7 @@ int get_digit(char *filename)
 	return digit_1;
 }
 
-int ldCheckRevision(char *path_file1, char *path_file2, char *path_file3, char *valuestring, int *version, int *checksum, char digest[0x11], char *lockdownfile, char *imagedump)
+int ldCheckRevision(char *path_file1, char *path_file2, char *path_file3, char *valuestring, uint32_t *version, uint32_t *checksum, char digest[0x11], char *lockdownfile, char *imagedump)
 {
 	LD_SHA1_CTX ctx;
 	int return_is_valid = 1, module_offset = 0, seed, i; 
