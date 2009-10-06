@@ -160,21 +160,21 @@ bnls_logonproof(struct packet_reader *pr) {
 
 	/***/
 	cbls_log("[%u] BNLS_LOGONPROOF", cbls->uid);
-	char *m1;
+	char M1[20];
 
 	if(!cbls->nls) {
-		cbls_log("[%u] nls_get_m1() nls never initialized properly", cbls->uid);
+		cbls_log("[%u] nls_get_M1() NLS uninitialized", cbls->uid);
 		cbls_close(cbls);
 		return;
 	}
-	nls_get_M1(cbls->nls, m1, var_b, salt);
+	nls_get_M1(cbls->nls, M1, var_b, salt);
 
 	/**
 	 * (DWORD[5]) Data for SID_AUTH_ACCOUNTLOGONPROOF
 	 */
 	struct packet_writer pw;
 	write_init(&pw, cbls, BNLS_LOGONPROOF, 20);
-	write_raw(&pw, m1, 20);
+	write_raw(&pw, M1, 20);
 	write_end(&pw);
 }
 
