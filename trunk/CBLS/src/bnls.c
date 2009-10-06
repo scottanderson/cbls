@@ -1033,7 +1033,7 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 	}
 
 	if(f_game) {
-		if(productid == PRODUCT_W2BN) {
+		if(strstr(vc_filename, "lockdown")) {
 			char lockdownfile[128];
 			strcpy(lockdownfile, "lockdown/");
 			strcat(lockdownfile, vc_filename);
