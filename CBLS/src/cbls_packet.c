@@ -87,8 +87,8 @@ read_void(struct packet_reader *pr, int len) {
 	struct bnls_hdr *hdr = pr->ih;
 
 	if(hdr->len < SIZEOF_BNLS_HDR + pr->pos + len) {
-		cbls_log("[%u] read_raw() failed at pos %u", pr->cbls->uid, pr->pos + SIZEOF_BNLS_HDR);
-		packet_log("read_raw() failed", hdr);
+		cbls_log("[%u] read_void() failed at pos %u", pr->cbls->uid, pr->pos + SIZEOF_BNLS_HDR);
+		packet_log("read_void() failed", hdr);
 		return 0;
 	}
 
