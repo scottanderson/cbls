@@ -8,7 +8,7 @@
 #include <string.h>
 #include "bnls.h"
 #include "cbls_fd.h"
-//#include "debug.h" /* for packet_log() */
+#include "debug.h" /* for packet_log() */
 
 extern void cbls_log (const char *fmt, ...);
 
@@ -22,12 +22,7 @@ read_init(struct packet_reader *pr, struct cbls_conn *cbls) {
 int
 read_valid(struct packet_reader *pr) {
 	struct bnls_hdr *hdr = pr->ih;
-
-	if(hdr->id > BNLS_VERSIONCHECKEX2) {
-		cbls_log("[%u] Invalid packet id 0x%X", pr->cbls->uid, hdr->id);
-		return 0;
-	}
-
+	
 	if(hdr->len > 0xFF) {
 		cbls_log("[%u] Invalid packet len 0x%X", pr->cbls->uid, hdr->len);
 		return 0;
@@ -56,8 +51,11 @@ int
 read_raw(struct packet_reader *pr, void *dest, int len) {
 	struct bnls_hdr *hdr = pr->ih;
 
-	if(hdr->len < SIZEOF_BNLS_HDR + pr->pos + len)
+	if(hdr->len < SIZEOF_BNLS_HDR + pr->pos + len) {
+		cbls_log("[%u] read_raw() failed at pos %u", pr->cbls->uid, pr->pos + SIZEOF_BNLS_HDR);
+		packet_log("read_raw() failed", hdr);
 		return 0;
+	}
 
 	memcpy(dest, &hdr->data[pr->pos], len);
 	pr->pos += len;
@@ -86,7 +84,15 @@ read_qword(struct packet_reader *pr, u_int64_t *dest) {
 
 void*
 read_void(struct packet_reader *pr, int len) {
-	void *ret = &pr->ih->data[pr->pos];
+	struct bnls_hdr *hdr = pr->ih;
+
+	if(hdr->len < SIZEOF_BNLS_HDR + pr->pos + len) {
+		cbls_log("[%u] read_raw() failed at pos %u", pr->cbls->uid, pr->pos + SIZEOF_BNLS_HDR);
+		packet_log("read_raw() failed", hdr);
+		return 0;
+	}
+
+	void *ret = &hdr->data[pr->pos];
 	pr->pos += len;
 	return ret;
 }
@@ -108,6 +114,8 @@ read_string(struct packet_reader *pr) {
 	}
 
 	// Couldn't validate the data
+	cbls_log("[%u] read_string() failed at pos %u", pr->cbls->uid, pr->pos + SIZEOF_BNLS_HDR);
+	packet_log("read_string() failed", hdr);
 	return 0;
 }
 
