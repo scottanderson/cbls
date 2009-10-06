@@ -244,7 +244,7 @@ int ld_sha1_hash_file(LD_SHA1_CTX *ctx, char *filename)
 {
 	struct stat filestat;
 	FILE *f;
-	unsigned char *data;
+	char *data;
 	size_t actual;
 
 	if(stat(filename, &filestat) < 0 )

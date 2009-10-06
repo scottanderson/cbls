@@ -23,6 +23,7 @@ THE SOFTWARE. */
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -63,7 +64,7 @@ int seeds[20] =
 	 0x58BEDE0B ,	//19	
 };
 
-static int shuffle_value_string(unsigned char *str, int len, unsigned char *buffer);
+static int shuffle_value_string(char *str, int len, char *buffer);
 static int hash_file(LD_SHA1_CTX *ctx, char *filename, int seed);
 static int process_reloc_dir(t_lockdown_heap *lockdown_heap, char *baseaddr, PIMAGE_DATA_DIRECTORY reloc);
 static int process_section(LD_SHA1_CTX *ctx, t_lockdown_heap *lockdown_heap, char *baseaddr, void *preferred_baseaddr, PIMAGE_SECTION_HEADER section, int section_alignment, int seed);
@@ -164,7 +165,7 @@ int ldCheckRevision(char *path_file1, char *path_file2, char *path_file3, char *
 	return 1;
 }
 
-int shuffle_value_string(unsigned char *str, int len, unsigned char *buffer)
+int shuffle_value_string(char *str, int len, char *buffer)
 {
 	int pos;
 	int i;
