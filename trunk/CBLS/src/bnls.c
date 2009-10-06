@@ -54,6 +54,34 @@ verbyte(int prod) {
 	}
 }
 
+typedef struct {
+	u_int32_t client_token;
+	u_int32_t server_token;
+	char *cdkey;
+	u_int8_t success;
+	u_int32_t hash[9];
+} key_hash_t;
+
+void key_hash(key_hash_t *key) {
+	u_int32_t *d_keylen = &key->hash[0];
+	u_int32_t *d_prod = &key->hash[1];
+	u_int32_t *d_pub = &key->hash[2];
+	u_int32_t *d_unused = &key->hash[3];
+	char *d_buf = (char*)&key->hash[4];
+
+	key->success = !kd_quick(key->cdkey, key->client_token, key->server_token,
+			d_pub, d_prod, d_buf, 20);
+
+	if(key->success) {
+		// Success
+		*d_keylen = strlen(key->cdkey);
+		*d_unused = 0;
+	} else {
+		// Failure
+		memset(key->hash, 0, 36);
+	}
+}
+
 void
 bnls_null(struct packet_reader *pr) {
 	// keep-alive
@@ -66,32 +94,18 @@ bnls_cdkey(struct packet_reader *pr) {
 	 * (DWORD)  Server Token
 	 * (STRING) CD-Key, no dashes or spaces
 	 */
-	u_int32_t server_token;
-	char *cdkey;
+	key_hash_t key;
+	memset(&key_hash, 0, sizeof(key_hash_t));
 
-	if(!read_dword(pr, &server_token)
-	|| !(cdkey = read_string(pr))) {
+	if(!read_dword(pr, &key.server_token)
+	|| !(key.cdkey = read_string(pr))) {
 		cbls_close(cbls);
 		return;
 	}
 
 	/***/
-	cbls_log("[%u] BNLS_CDKEY %s", cbls->uid, cdkey);
-	u_int32_t result;
-	u_int32_t client_token = (u_int32_t)rand();
-	u_int32_t hash[9];
-
-	result = !kd_quick(cdkey, client_token, server_token,
-			&hash[2], &hash[1], (char*)&hash[4], 20);
-
-	if(result) {
-		// Success
-		hash[0] = strlen(cdkey);
-		hash[3] = 0;
-	} else {
-		// Failure
-		memset(hash, 0, 36);
-	}
+	cbls_log("[%u] BNLS_CDKEY %s", cbls->uid, key.cdkey);
+	key_hash(&key);
 
 	/**
 	 * (BOOLEAN)  Result
@@ -99,10 +113,10 @@ bnls_cdkey(struct packet_reader *pr) {
 	 * (DWORD[9]) CD key data for SID_AUTH_CHECK
 	 */
 	struct packet_writer pw;
-	write_init(&pw, cbls, BNLS_CDKEY, 4);
-	write_dword(&pw, result);
-	write_dword(&pw, client_token);
-	write_raw(&pw, hash, 36);
+	write_init(&pw, cbls, BNLS_CDKEY, 44);
+	write_dword(&pw, key.success);
+	write_dword(&pw, key.client_token);
+	write_raw(&pw, key.hash, 36);
 	write_end(&pw);
 }
 
@@ -579,26 +593,151 @@ bnls_cdkey_ex(struct packet_reader *pr) {
 	 * (DWORD)    Cookie. This value has no special meaning to the server and will simply be echoed to the client in the response.
 	 * (BYTE)     Amount of CD-keys to encrypt. Must be between 1 and 32.
 	 * (DWORD)    Flags
-	 * (DWORD[])  Server session key(s) (optional; check flags)
+	 * (DWORD[])  Server session key(s) (check flags)
 	 * (DWORD[])  Client session key(s) (optional; check flags)
 	 * (STRING[]) CD-keys. No dashes or spaces. The client can use multiple types of CD-keys in the same packet.
+	 *
+	 * Flags:
+	 * CDKEY_SAME_SESSION_KEY (0x01):
+	 * This flag specifies that all the returned CD-keys will use the same client session key. When used in combination with
+	 * CDKEY_GIVEN_SESSION_KEY (0x02), a single client session key is specified immediately after the server session key(s).
+	 * When used without CDKEY_GIVEN_SESSION_KEY (0x02), a client session key isn't sent in the request, and the server will
+	 * create one. When not used, each CD-key gets its own client session key. This flag has no effect if the amount of CD-keys
+	 * to encrypt is 1.
+	 *
+	 * CDKEY_GIVEN_SESSION_KEY (0x02):
+	 * This flag specifies that the client session keys to be used are specified in the request. When used in combination with
+	 * CDKEY_SAME_SESSION_KEY (0x01), a single client session key is specified immediately after the server session key(s). When
+	 * used without CDKEY_SAME_SESSION_KEY (0x01), an array of client session keys (as many as the amount of CD-keys) is specified.
+	 * When not used, client session keys aren't included in the request.
+	 *
+	 * CDKEY_MULTI_SERVER_SESSION_KEYS (0x04):
+	 * This flag specifies that each CD-key has its own server session key. When specified, an array of server session keys
+	 * (as many as the amount of CD-keys) is specified. When not specified, a single server session key is specified. This flag
+	 * has no effect if the amount of CD-keys to encrypt is 1.
+	 *
+	 * CDKEY_OLD_STYLE_RESPONSES (0x08):
+	 * Specifies that the response to this packet is a number of BNLS_CDKEY (0x01) responses, instead of a BNLS_CDKEY_EX (0x0c)
+	 * response. The responses are guaranteed to be in the order of the CD-keys' appearance in the request. Note that when this
+	 * flag is specified, the Cookie cannot be echoed. (It must still be included in the request.)
 	 */
+	int i;
+	u_int32_t cookie, flags;
+	u_int8_t num_keys;
+	key_hash_t *keys;
+
+	if(!read_dword(pr, &cookie)
+	|| !read_byte(pr, &num_keys)
+	|| (num_keys < 1)
+	|| (num_keys > 32)
+	|| !read_dword(pr, &flags)) {
+		cbls_close(cbls);
+		return;
+	}
+
+	keys = xmalloc(num_keys * sizeof(key_hash_t));
+	memset(keys, 0, num_keys * sizeof(key_hash_t));
+
+	if(flags & 0x04) { // CDKEY_MULTI_SERVER_SESSION_KEYS
+		// One server key for each cdkey
+		for(i = 0; i < num_keys; i++) {
+			if(!read_dword(pr, &keys[i].server_token)) {
+				xfree(keys);
+				cbls_close(cbls);
+				return;
+			}
+		}
+	} else {
+		// One server key
+		u_int32_t server_token;
+		if(!read_dword(pr, &server_token)) {
+			xfree(keys);
+			cbls_close(cbls);
+			return;
+		}
+		for(i = 0; i < num_keys; i++)
+			keys[i].server_token = server_token;
+	}
+
+	if(flags & 0x02) { // CDKEY_GIVEN_SESSION_KEY
+		if(flags & 0x01) { // CDKEY_SAME_SESSION_KEY
+			// One client key
+			u_int32_t client_token;
+			if(!read_dword(pr, &client_token)) {
+				xfree(keys);
+				cbls_close(cbls);
+				return;
+			}
+			for(i = 0; i < num_keys; i++)
+				keys[i].client_token = client_token;
+		} else {
+			// One client key for each cdkey
+			if(!read_dword(pr, &keys[i].client_token)) {
+				xfree(keys);
+				cbls_close(cbls);
+				return;
+			}
+		}
+	} else {
+		// Generate our own client keys
+		for(i = 0; i < num_keys; i++)
+			keys[i].client_token = (u_int32_t)rand();
+	}
+
+	for(i = 0; i < num_keys; i++) {
+		if(!(keys[i].cdkey = read_string(pr))) {
+			xfree(keys);
+			cbls_close(cbls);
+			return;
+		}
+	}
 
 	/***/
-	cbls_log("[%u] BNLS_CDKEY_EX unimplemented", cbls->uid);
-	cbls_close(cbls);
-	return;
+	u_int32_t num_success = 0;
+	u_int32_t success_bitmask = 0;
+	for(i = 0; i < num_keys; i++) {
+		key_hash(&keys[i]);
+		if(keys[i].success) {
+			num_success++;
+			success_bitmask |= (1 << i);
+		}
+	}
 
 	/**
 	 * (DWORD) Cookie
 	 * (BYTE)  Number of CD-keys requested
-	 * (BYTE)  Number of successfully ecrypted CD-keys
+	 * (BYTE)  Number of successfully encrypted CD-keys
 	 * (DWORD) Bit mask
 	 *
 	 * For each successful CD Key:
 	 * (DWORD)    Client session key
 	 * (DWORD[9]) CD-key data.
 	 */
+	struct packet_writer pw;
+	if(flags & 0x08) {
+		for(i = 0; i < num_keys; i++) {
+			write_init(&pw, cbls, BNLS_CDKEY, 44);
+			write_dword(&pw, keys[i].success);
+			write_dword(&pw, keys[i].client_token);
+			write_raw(&pw, keys[i].hash, 36);
+			write_end(&pw);
+		}
+	} else {
+		write_init(&pw, cbls, BNLS_CDKEY_EX, 10 + (num_success * 40));
+		write_dword(&pw, cookie);
+		write_dword(&pw, num_keys);
+		write_dword(&pw, num_success);
+		write_dword(&pw, success_bitmask);
+		for(i = 0; i < num_keys; i++) {
+			if(!keys[i].success)
+				continue;
+			write_dword(&pw, keys[i].client_token);
+			write_raw(&pw, keys[i].hash, 36);
+		}
+	}
+
+	/***/
+	xfree(keys);
 }
 
 void
