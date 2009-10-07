@@ -82,6 +82,69 @@ void key_hash(key_hash_t *key) {
 	}
 }
 
+typedef struct {
+	char *f_game;
+	char *f_snp;
+	char *f_storm;
+	char *f_img;
+} hash_files_t;
+
+static hash_files_t *hash_files = 0;
+
+hash_files_t*
+get_hashes(u_int32_t prod) {
+	if((prod < PRODUCT_FIRST) || (prod > PRODUCT_LAST))
+		return 0;
+
+	if(!hash_files) {
+		int length = (PRODUCT_LAST - PRODUCT_FIRST) * sizeof(hash_files_t);
+		hash_files = xmalloc(length);
+		memset(hash_files, 0, length);
+	}
+
+	hash_files_t *prod_hashes = &hash_files[prod-PRODUCT_FIRST];
+	if(prod_hashes->f_game)
+		return prod_hashes;
+
+	char prefix[11];
+	strcpy(prefix, "IX86/");
+	strcat(prefix, gamestr(prod));
+	strcat(prefix, "/");
+
+	char files_txt[20];
+	strcpy(files_txt, prefix);
+	strcat(files_txt, "Files.txt");
+
+	FILE *ftxt = fopen(files_txt, "r");
+	if(ftxt == NULL) {
+		cbls_log("Couldn't open %s", files_txt);
+		exit(1);
+	}
+
+	char temp[128];
+	strcpy(temp, prefix);
+	if(fscanf(ftxt, "%s\n", &temp[10]) < 1) {
+		cbls_log("Couldn't find game.exe filename in %s", files_txt);
+		exit(1);
+	}
+	prod_hashes->f_game = strdup(temp);
+	if(fscanf(ftxt, "%s\n", &temp[10]) < 1) {
+		cbls_log("Couldn't find storm.dll filename in %s", files_txt);
+		exit(1);
+	}
+	prod_hashes->f_storm = strdup(temp);
+	if(fscanf(ftxt, "%s\n", &temp[10]) < 1) {
+		cbls_log("Couldn't find battle.snp filename in %s", files_txt);
+		exit(1);
+	}
+	prod_hashes->f_snp = strdup(temp);
+	if(fscanf(ftxt, "%s", &temp[10]) >= 1)
+		prod_hashes->f_img = strdup(temp);
+
+	fclose(ftxt);
+	return prod_hashes;
+}
+
 void
 bnls_null(struct packet_reader *pr) {
 	// keep-alive
@@ -410,53 +473,24 @@ bnls_versioncheck(struct packet_reader *pr) {
 	/***/
 	cbls_log("[%u] BNLS_VERSIONCHECK %s %u", cbls->uid, gamestr(product_id), version_dll);
 	u_int32_t success, version, checksum;
-	char *f_game, *f_storm, *f_snp, *f_img;
+	hash_files_t *hashes;
 	char statstr[128];
 
 	memset(statstr, 0, 128);
 	success = 0;
 
-	switch(product_id) {
-	case PRODUCT_STAR:
-	case PRODUCT_SEXP:
-		f_game = "IX86/STAR/Starcraft.exe";
-		f_storm = "IX86/STAR/Storm.dll";
-		f_snp = "IX86/STAR/Battle.snp";
-		f_img = "IX86/STAR/STAR.bin";
-		break;
-	case PRODUCT_W2BN:
-		f_game = "IX86/W2BN/Warcraft II BNE.exe";
-		f_storm = "IX86/W2BN/Storm.dll";
-		f_snp = "IX86/W2BN/Battle.snp";
-		f_img = "IX86/W2BN/W2BN.bin";
-		break;
-	case PRODUCT_D2DV:
-		f_game = "IX86/D2DV/Game.exe";
-		f_storm = "IX86/D2DV/BNClient.dll";
-		f_snp = "IX86/D2DV/D2Client.dll";
-		break;
-	case PRODUCT_D2XP:
-		f_game = "IX86/D2XP/Game.exe";
-		f_storm = "IX86/D2XP/BNClient.dll";
-		f_snp = "IX86/D2XP/D2Client.dll";
-		break;
-	case PRODUCT_WAR3:
-	case PRODUCT_W3XP:
-		f_game = "IX86/WAR3/war3.exe";
-		f_storm = "IX86/WAR3/Storm.dll";
-		f_snp = "IX86/WAR3/game.dll";
-		break;
-	default:
-		f_game = 0;
-	}
+	hashes = get_hashes(product_id);
 
-	if(f_game) {
+	if(hashes && hashes->f_game) {
+		/* if(hashes->f_img) */
 		if((product_id == PRODUCT_STAR)
 		|| (product_id == PRODUCT_SEXP)
 		|| (product_id == PRODUCT_W2BN)) {
 			char lockdownfile[32];
-			snprintf(lockdownfile, 32, "lockdown/lockdown-IX86-%u.dll", version_dll);
-			success = ldCheckRevision(f_game, f_storm, f_snp, checksum_formula, &version, &checksum, statstr, lockdownfile, f_img);
+			snprintf(lockdownfile, 32, "IX86/lockdown-IX86-%u.dll", version_dll);
+			success = ldCheckRevision(hashes->f_game, hashes->f_storm, hashes->f_snp, checksum_formula,
+					&version, &checksum, statstr,
+					lockdownfile, hashes->f_img);
 			if(!success)
 				cbls_log("[%u] ldCheckRevision() failed!", cbls->uid);
 			else
@@ -464,10 +498,10 @@ bnls_versioncheck(struct packet_reader *pr) {
 		} else {
 			if(version_dll >= 0) {
 				success = checkRevisionFlat(
-						checksum_formula, f_game, f_storm, f_snp, version_dll, &checksum);
+						checksum_formula, hashes->f_game, hashes->f_storm, hashes->f_snp, version_dll, &checksum);
 				if(success) {
 					success = getExeInfo(
-							f_game, statstr, 128, &version, BNCSUTIL_PLATFORM_X86);
+							hashes->f_game, statstr, 128, &version, BNCSUTIL_PLATFORM_X86);
 					if(!success)
 						cbls_log("[%u] getExeInfo() failed", cbls->uid);
 				} else {
@@ -989,14 +1023,14 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 	 * (STRING) Version Check Archive Filename
 	 * (STRING) Checksum Formula
 	 */
-	u_int32_t productid;
+	u_int32_t product_id;
 	u_int32_t flags;
 	u_int32_t cookie;
 	u_int64_t timestamp;
 	char *vc_filename;
 	char *checksum_formula;
 
-	if(!read_dword(pr, &productid)
+	if(!read_dword(pr, &product_id)
 	|| !read_dword(pr, &flags)
 	|| (flags != 0)
 	|| !read_dword(pr, &cookie)
@@ -1008,38 +1042,27 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 	}
 
 	/***/
-	cbls_log("[%u] BNLS_VERSIONCHECKEX2 %s %s", cbls->uid, gamestr(productid), vc_filename);
+	cbls_log("[%u] BNLS_VERSIONCHECKEX2 %s %s", cbls->uid, gamestr(product_id), vc_filename);
 	u_int32_t success, version, checksum;
 	char statstr[128];
 	memset(statstr, 0, 128);
 	success = 0;
 
-	char *f_game, *f_storm, *f_snp, *f_img;
-	switch(productid) {
-	case PRODUCT_W2BN:
-		f_game = "IX86/W2BN/Warcraft II BNE.exe";
-		f_storm = "IX86/W2BN/Storm.dll";
-		f_snp = "IX86/W2BN/Battle.snp";
-		f_img = "IX86/W2BN/W2BN.bin";
-		break;
-	case PRODUCT_WAR3:
-	case PRODUCT_W3XP:
-		f_game = "IX86/WAR3/war3.exe";
-		f_storm = "IX86/WAR3/Storm.dll";
-		f_snp = "IX86/WAR3/game.dll";
-		break;
-	default:
-		f_game = 0;
-	}
+	hash_files_t *hashes = get_hashes(product_id);
 
-	if(f_game) {
-		if(strstr(vc_filename, "lockdown")) {
-			char lockdownfile[128];
-			strcpy(lockdownfile, "lockdown/");
+	if(hashes && hashes->f_game) {
+		/* if(hashes->f_img) */
+		if((product_id == PRODUCT_STAR)
+		|| (product_id == PRODUCT_SEXP)
+		|| (product_id == PRODUCT_W2BN)) {
+			char lockdownfile[64];
+			strcpy(lockdownfile, "IX86/");
 			strcat(lockdownfile, vc_filename);
 			strcpy(lockdownfile+strlen(lockdownfile)-4, ".dll");
 
-			success = ldCheckRevision(f_game, f_storm, f_snp, checksum_formula, &version, &checksum, statstr, lockdownfile, f_img);
+			success = ldCheckRevision(hashes->f_game, hashes->f_storm, hashes->f_snp, checksum_formula,
+					&version, &checksum, statstr,
+					lockdownfile, hashes->f_img);
 			if(!success)
 				cbls_log("[%u] ldCheckRevision() failed!", cbls->uid);
 			else
@@ -1048,10 +1071,10 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 			int mpqNumber = extractMPQNumber(vc_filename);
 			if(mpqNumber >= 0) {
 				success = checkRevisionFlat(
-						checksum_formula, f_game, f_storm, f_snp, mpqNumber, &checksum);
+						checksum_formula, hashes->f_game, hashes->f_storm, hashes->f_snp, mpqNumber, &checksum);
 				if(success) {
 					success = getExeInfo(
-							f_game, statstr, 128, &version, BNCSUTIL_PLATFORM_X86);
+							hashes->f_game, statstr, 128, &version, BNCSUTIL_PLATFORM_X86);
 					if(!success)
 						cbls_log("[%u] getExeInfo() failed", cbls->uid);
 				} else {
@@ -1062,10 +1085,10 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 			}
 		}
 	} else {
-		cbls_log("[%u] unknown product %u", cbls->uid, productid);
+		cbls_log("[%u] unknown product %u", cbls->uid, product_id);
 	}
 
-    u_int32_t vb = verbyte(productid);
+    u_int32_t vb = verbyte(product_id);
     if(vb == -1)
     	success = 0;
 
