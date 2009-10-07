@@ -2,7 +2,7 @@
  * cbls_packet_handler.c
  *
  *  Created on: Oct 1, 2009
- *      Author: sanderson
+ *      Author: Scott
  */
 
 #include <string.h>
@@ -148,6 +148,7 @@ get_hashes(u_int32_t prod) {
 void
 bnls_null(struct packet_reader *pr) {
 	// keep-alive
+	cbls_log("[%u] BNLS_NULL", pr->cbls->uid);
 }
 
 void
@@ -309,8 +310,7 @@ bnls_changechallenge(struct packet_reader *pr) {
 
 	if(!(account_name = read_string(pr))
 	|| !(account_old_pass = read_string(pr))
-	|| !(account_new_pass = read_string(pr)))
-	{
+	|| !(account_new_pass = read_string(pr))) {
 		cbls_close(cbls);
 		return;
 	}
@@ -1032,11 +1032,16 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 
 	if(!read_dword(pr, &product_id)
 	|| !read_dword(pr, &flags)
-	|| (flags != 0)
 	|| !read_dword(pr, &cookie)
 	|| !read_qword(pr, &timestamp)
 	|| !(vc_filename = read_string(pr))
 	|| !(checksum_formula = read_string(pr))) {
+		cbls_close(cbls);
+		return;
+	}
+
+	if(flags) {
+		packet_log("BNLS_VERSIONCHECKEX2 flags != 0", pr->ih);
 		cbls_close(cbls);
 		return;
 	}
