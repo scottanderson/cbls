@@ -1,0 +1,4 @@
+Diablo.exe
+Storm.dll
+Battle.snp
+DRTL.bin

@@ -43,6 +43,9 @@ struct bnls_hdr {
 #define PRODUCT_DSHR (0x0A)
 #define PRODUCT_SSHR (0x0B)
 
+#define PRODUCT_FIRST PRODUCT_STAR
+#define PRODUCT_LAST PRODUCT_SSHR
+
 #define BNLS_NULL					((u_int8_t) 0x00)
 #define BNLS_CDKEY					((u_int8_t) 0x01)
 #define BNLS_LOGONCHALLENGE			((u_int8_t) 0x02)

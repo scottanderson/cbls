@@ -1,0 +1,4 @@
+Starcraft.exe
+Storm.dll
+Battle.snp
+SSHR.bin
