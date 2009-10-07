@@ -122,11 +122,12 @@ read_string(struct packet_reader *pr) {
 void
 read_end(struct packet_reader *pr) {
 	struct qbuf *in = &pr->cbls->in;
-	struct bnls_hdr *hdr = pr->ih;
+	/* copy the length out of the packet, because we can't point to it after memmove */
+	u_int16_t packet_len = pr->ih->len;
 
-	if(in->pos != hdr->len)
-		memmove(&in->buf[0], &in->buf[hdr->len], in->pos - hdr->len);
-	in->pos -= hdr->len;
+	if(in->pos != packet_len)
+		memmove(&in->buf[0], &in->buf[packet_len], in->pos - packet_len);
+	in->pos -= packet_len;
 }
 
 /**
