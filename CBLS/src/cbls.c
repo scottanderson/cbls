@@ -13,6 +13,7 @@
 #include "cbls_fd.h"
 #include "cbls_server.h"
 #include "cbls_protocol.h"
+#include "cbls_timer.h"
 
 u_int16_t ncbls_conns = 0;
 u_int16_t cbls_conn_counter = 0;
@@ -159,6 +160,22 @@ cbls_write (int fd)
 	}
 }
 
+int
+cbls_timeout (struct cbls_conn *cbls) {
+	struct timeval now;
+	gettimeofday(&now, 0);
+
+	/* Check if the user has done anything in the past 5 minutes */
+	if(tv_secdiff(&cbls->idle_tv, &now) > 300) {
+		/* They are idle */
+		cbls_close(cbls);
+		return 0;
+	}
+
+	/* They are not idle */
+	return 1;
+}
+
 /*
  * Call after checking the banlist
  */
@@ -173,7 +190,7 @@ cbls_accepted (struct cbls_conn *cbls)
 
 	cbls->rcv = cbls_protocol_rcv;
 
-	//timer_add_secs(10, login_timeout, cbls);
+	timer_add_secs(10, cbls_timeout, cbls);
 
 	/* qbuf_set(&cbls->in, 0, cbls_MAGIC_LEN); */
 	qbuf_set(&cbls->in, 0, 0);
