@@ -70,6 +70,9 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 		if(!read_ready(&pr))
 			break;
 
+		/* recieved a complete packet; bump the user idle timer */
+		gettimeofday(&cbls->idle_tv, 0);
+
 		/* big switch for packet ids */
 		switch(pr.ih->id) {
 		case BNLS_NULL:
