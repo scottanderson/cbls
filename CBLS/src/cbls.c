@@ -40,6 +40,7 @@ cbls_new (void)
 	ncbls_conns++;
 	//cbls->access_extra.can_login = 1;
 	cbls->uid = cbls_conn_counter++;
+	gettimeofday(&cbls->login_tv, 0);
 
 	return cbls;
 }
@@ -58,7 +59,7 @@ cbls_close (struct cbls_conn *cbls)
 	inaddr2str(abuf, &cbls->sockaddr);
 	cbls_log("[%u] %s:%u -- cbls connection closed",
 		cbls->uid, abuf, ntohs(cbls->sockaddr.SIN_PORT));
-	//timer_delete_ptr(cbls);
+	timer_delete_ptr(cbls);
 	if (cbls->next)
 		cbls->next->prev = cbls->prev;
 	if (cbls->prev)
