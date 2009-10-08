@@ -13,6 +13,7 @@
 #include "xmalloc.h"
 #include "cbls_server.h"
 #include "cbls_fd.h"
+#include "cbls_timer.h"
 
 #if defined(__APPLE__)
 #include <stdlib.h>
@@ -92,36 +93,38 @@ get_open_max(void)
 	return om;
 }
 
+//struct timeval loopZ_timeval;
+
 static void
 loopZ (void)
 {
 	fd_set rfds, wfds;
-	//struct timeval before, tv;
+	struct timeval before, tv;
 
-	//gettimeofday(&tv, 0);
+	gettimeofday(&tv, 0);
 	for (;;) {
 		register int n, i;
 
-		/*if (timer_list) {
+		if (timer_list) {
 			gettimeofday(&before, 0);
 			timer_check(&tv, &before);
 			if (timer_list)
 				tv = timer_list->tv;
-		}*/
+		}
 		rfds = cbls_rfds;
 		wfds = cbls_wfds;
-		n = select(high_fd + 1, &rfds, &wfds, 0, /*timer_list ? &tv :*/ 0);
+		n = select(high_fd + 1, &rfds, &wfds, 0, timer_list ? &tv : 0);
 		if (n < 0) {
 			if (errno != EINTR) {
 				cbls_log("loopZ: select: %s", strerror(errno));
 				exit(1);
 			}
 		}
-		/*gettimeofday(&tv, 0);
-		loopZ_timeval = tv;
+		gettimeofday(&tv, 0);
+		//loopZ_timeval = tv;
 		if (timer_list) {
 			timer_check(&before, &tv);
-		}*/
+		}
 		if (n <= 0)
 			continue;
 		for (i = 0; i < high_fd + 1; i++) {
