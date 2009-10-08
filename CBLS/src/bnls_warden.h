@@ -35,35 +35,24 @@
  */
 #define WARDEN_RESULT_WARDEN_HACK_CHECK_ERROR 0x06
 /**
- *
- - The offsets have probly changed and the BNLS server is not yet aware.
+ * The offsets have probably changed and the server is not yet aware
  */
 #define WARDEN_RESULT_WARDEN_CHECK_INVALID 0x07
 /**
- *
- - This is used with useage 0x02.
- - Currently, only warden packet 0x05 is supported.
+ * Command 0x02: Unsupported warden packet
  */
 #define WARDEN_RESULT_INCOMING_WARDEN_PACKET_UNSUPPORTED 0x08
 /**
- *
- - This is used with useage 0x03.
- - BNLS is not yet able to process this info type.
- - Currentl supported info types are: 0x01
+ * Command 0x03: BNLS was not able to process this info type
  */
 #define WARDEN_RESULT_UNSUPPORTED_WARDEN_INFO_TYPE 0x09
 /**
- *
- - This is used with useage 0x00.
- - Currently, that method is open for all to use. (leave user name and password as blank strings)
- - In the future, if the sevrer is being abused, it maybe required of you, to use a BNLS username and password.
+ * Command 0x00: Invalid BNLS username/password
  */
 #define WARDEN_RESULT_INVALID_PASSOWRD 0xFD
 #define WARDEN_RESULT_INVALID_USERNAME 0xFE
 /**
- *
- - You're BNLS 0x7D packet had bad format, or sizes.
- - The "data" in the responce, may contain an offset into you're packet, where the problem is.
+ * Your BNLS_WARDEN packet was corrupt
  */
 #define WARDEN_RESULT_REQUEST_CORRUPT 0xFF
 
