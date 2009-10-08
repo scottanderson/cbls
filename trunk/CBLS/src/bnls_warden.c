@@ -33,7 +33,6 @@ snd_warden_error(struct cbls_conn *cbls, u_int8_t command, u_int32_t cookie, u_i
 
 void
 bnls_warden_0(struct packet_reader *pr, u_int32_t cookie) {
-	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (DWORD)  Client
 	 * (WORD)   Length of Seed (should be 4 always)
@@ -55,7 +54,7 @@ bnls_warden_0(struct packet_reader *pr, u_int32_t cookie) {
 	|| !(username = read_string(pr))
 	|| !read_word(pr, &password_len)
 	|| !(password = read_void(pr, password_len))) {
-		cbls_close(cbls);
+		snd_warden_error(pr->cbls, 0, cookie, WARDEN_RESULT_REQUEST_CORRUPT);
 		return;
 	}
 
@@ -65,7 +64,6 @@ bnls_warden_0(struct packet_reader *pr, u_int32_t cookie) {
 
 void
 bnls_warden_1(struct packet_reader *pr, u_int32_t cookie) {
-	struct cbls_conn *cbls = pr->cbls;
 	/**
 	 * (WORD) Lengh Of Warden Packet
 	 * (VOID) Warden Packet Data
@@ -75,7 +73,7 @@ bnls_warden_1(struct packet_reader *pr, u_int32_t cookie) {
 
 	if(!read_word(pr, &payload_len)
 	|| !(payload = read_void(pr, payload_len))) {
-		cbls_close(cbls);
+		snd_warden_error(pr->cbls, 1, cookie, WARDEN_RESULT_REQUEST_CORRUPT);
 		return;
 	}
 
@@ -94,9 +92,27 @@ bnls_warden_2(struct packet_reader *pr, u_int32_t cookie) {
 	 * (WORD)     Lengh of Warden 0x05 packet
 	 * (VOID)     Warden 0x05 packet
 	 */
+	u_int32_t client;
+	u_int16_t seed_len;
+	void *seed;
+	u_int32_t unused;
+	void *mod_md5_name;
+	u_int16_t payload_len;
+	void *payload;
+
+	if(!read_dword(pr, &client)
+	|| !read_word(pr, &seed_len)
+	|| !(seed = read_void(pr, seed_len))
+	|| !read_dword(pr, &unused)
+	|| !(mod_md5_name = read_void(pr, 16))
+	|| !read_word(pr, &payload_len)
+	|| !(payload = read_void(pr, payload_len))) {
+		snd_warden_error(pr->cbls, 2, cookie, WARDEN_RESULT_REQUEST_CORRUPT);
+		return;
+	}
 
 	/***/
-	snd_warden_error(pr->cbls, 1, cookie, WARDEN_RESULT_INCOMING_WARDEN_PACKET_UNSUPPORTED);
+	snd_warden_error(pr->cbls, 2, cookie, WARDEN_RESULT_INCOMING_WARDEN_PACKET_UNSUPPORTED);
 }
 
 void
@@ -107,7 +123,18 @@ bnls_warden_3(struct packet_reader *pr, u_int32_t cookie) {
 	 * (WORD)     Unused (must be 0x00)
 	 * (VOID)     Unused
 	 */
+	u_int32_t client;
+	u_int32_t info_type;
+	u_int16_t unused;
+
+	if(!read_dword(pr, &client)
+	|| !read_dword(pr, &info_type)
+	|| !read_word(pr, &unused)
+	|| (unused != 0)) {
+		snd_warden_error(pr->cbls, 3, cookie, WARDEN_RESULT_REQUEST_CORRUPT);
+		return;
+	}
 
 	/***/
-	snd_warden_error(pr->cbls, 1, cookie, WARDEN_RESULT_UNSUPPORTED_WARDEN_INFO_TYPE);
+	snd_warden_error(pr->cbls, 3, cookie, WARDEN_RESULT_UNSUPPORTED_WARDEN_INFO_TYPE);
 }

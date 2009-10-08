@@ -1138,7 +1138,7 @@ bnls_warden(struct packet_reader *pr) {
 	u_int32_t cookie;
 	if(!read_byte(pr, &command)
 	|| !read_dword(pr, &cookie)) {
-		cbls_close(cbls);
+		snd_warden_error(pr->cbls, 0, cookie, WARDEN_RESULT_REQUEST_CORRUPT);
 		return;
 	}
 
@@ -1157,7 +1157,7 @@ bnls_warden(struct packet_reader *pr) {
 		bnls_warden_3(pr, cookie);
 		return;
 	default:
-		cbls_log("[%u] BNLS_WARDEN unknown usage %u", command);
+		cbls_log("[%u] BNLS_WARDEN unknown command %u", command);
 		break;
 	}
 
