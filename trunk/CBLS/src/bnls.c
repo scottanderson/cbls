@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "bnls.h"
+#include "bnls_warden.h"
 #include "debug.h"
 #include "bncsutil.h"
 #include "xmalloc.h"
@@ -1130,44 +1131,42 @@ void
 bnls_warden(struct packet_reader *pr) {
 	struct cbls_conn *cbls = pr->cbls;
 	/**
-	 * (BYTE)  Usage
+	 * (BYTE)  Command
 	 * (DWORD) Cookie
-	 *
-	 * Usage 0x00
-	 * (DWORD)  Client
-	 * (WORD)   Length of Seed (should be 4 always)
-	 * (VOID)   Seed
-	 * (STRING) Username
-	 * (WORD)   Length of password
-	 * (VOID)   Password
-	 *
-	 * Usage 0x01
-	 * (WORD) Length of Warden Packet
-	 * (VOID) Warden Packet Data
 	 */
-	u_int8_t usage;
+	u_int8_t command;
 	u_int32_t cookie;
-	if(!read_byte(pr, &usage)
+	if(!read_byte(pr, &command)
 	|| !read_dword(pr, &cookie)) {
 		cbls_close(cbls);
 		return;
 	}
 
 	/***/
-	cbls_log("[%u] BNLS_WARDEN unimplemented", cbls->uid);
+	switch(command) {
+	case 0:
+		bnls_warden_0(pr, cookie);
+		return;
+	case 1:
+		bnls_warden_1(pr, cookie);
+		return;
+	case 2:
+		bnls_warden_2(pr, cookie);
+		return;
+	case 3:
+		bnls_warden_3(pr, cookie);
+		return;
+	default:
+		cbls_log("[%u] BNLS_WARDEN unknown usage %u", command);
+		break;
+	}
 
 	/**
-	 * (BYTE)  Usage
+	 * (BYTE)  Command
 	 * (DWORD) Cookie
 	 * (BYTE)  Result
 	 * (WORD)  Lengh of data
 	 * (VOID)  Data
 	 */
-	struct packet_writer pw;
-	write_init(&pw, cbls, BNLS_WARDEN, 8);
-	write_byte(&pw, usage);
-	write_dword(&pw, cookie);
-	write_byte(&pw, 0x04); // error executing warden module
-	write_word(&pw, 0);
-	write_end(&pw);
+	snd_warden_error(cbls, command, cookie, WARDEN_RESULT_REQUEST_CORRUPT);
 }
