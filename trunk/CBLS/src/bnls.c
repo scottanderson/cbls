@@ -35,26 +35,6 @@ gamestr(int prod) {
 	}
 }
 
-u_int32_t
-verbyte(int prod) {
-	// FIXME: don't hard-code version bytes
-	switch(prod) {
-	case PRODUCT_STAR:
-	case PRODUCT_SEXP: return 0xd3;
-	case PRODUCT_W2BN: return 0x4f;
-	case PRODUCT_D2DV:
-	case PRODUCT_D2XP: return 0x0c;
-	case PRODUCT_JSTR: return 0xa9;
-	case PRODUCT_WAR3:
-	case PRODUCT_W3XP: return 0x18;
-	case PRODUCT_DRTL:
-	case PRODUCT_DSHR: return 0x2a;
-	case PRODUCT_SSHR: return 0xa5;
-	default:
-		return -1;
-	}
-}
-
 typedef struct {
 	u_int32_t client_token;
 	u_int32_t server_token;
@@ -84,6 +64,7 @@ void key_hash(key_hash_t *key) {
 }
 
 typedef struct {
+	u_int32_t ver_byte;
 	char *f_game;
 	char *f_snp;
 	char *f_storm;
@@ -119,6 +100,12 @@ get_hashes(u_int32_t prod) {
 	FILE *ftxt = fopen(files_txt, "r");
 	if(ftxt == NULL) {
 		cbls_log("Couldn't open %s", files_txt);
+		exit(1);
+	}
+
+	/* Grab the version byte off the first line */
+	if(fscanf(ftxt, "0x%X\n", &prod_hashes->ver_byte) < 1) {
+		cbls_log("Couldn't find version byte in %s", files_txt);
 		exit(1);
 	}
 
@@ -862,8 +849,8 @@ bnls_requestversionbyte(struct packet_reader *pr) {
 
 	/***/
 	cbls_log("[%u] BNLS_REQUESTVERBYTE %s", cbls->uid, gamestr(prod));
-	u_int32_t verb = verbyte(prod);
-	if(verb == -1)
+	hash_files_t *hashes = get_hashes(prod);
+	if(!hashes)
 		prod = 0;
 
 	/**
@@ -876,7 +863,7 @@ bnls_requestversionbyte(struct packet_reader *pr) {
 	write_init(&pw, cbls, BNLS_REQUESTVERSIONBYTE, 8);
 	write_dword(&pw, prod);
 	if(prod != 0)
-		write_dword(&pw, verb);
+		write_dword(&pw, hashes->ver_byte);
 	write_end(&pw);
 }
 
@@ -1094,10 +1081,6 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 		cbls_log("[%u] unknown product %u", cbls->uid, product_id);
 	}
 
-    u_int32_t vb = verbyte(product_id);
-    if(vb == -1)
-    	success = 0;
-
 	/**
 	 * (BOOLEAN) Success
 	 *
@@ -1122,7 +1105,7 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 		write_dword(&pw, checksum);
 		write_string(&pw, statstr);
 		write_dword(&pw, cookie);
-		write_dword(&pw, vb);
+		write_dword(&pw, hashes->ver_byte);
 	}
 	write_end(&pw);
 }

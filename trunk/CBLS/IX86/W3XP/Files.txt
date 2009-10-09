@@ -1,3 +1,4 @@
+0x18
 war3.exe
 Storm.dll
 game.dll
