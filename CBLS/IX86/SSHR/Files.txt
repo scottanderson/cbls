@@ -1,3 +1,4 @@
+0xA5
 Starcraft.exe
 Storm.dll
 Battle.snp

@@ -1,3 +1,4 @@
+0x2A
 Diablo_s.exe
 Storm.dll
 Battle.snp
