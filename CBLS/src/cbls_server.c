@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <io.h> // write()
 #include "sys_net.h"
 #include "inetlib.h"
 #include "xmalloc.h"

@@ -5,8 +5,8 @@
  *      Author: Scott
  */
 
+#include <stdint.h>
 #include "sys_net.h"
-#include "sys_types.h"
 #include "inetlib.h"
 
 void
@@ -22,10 +22,10 @@ inaddr2str (char abuf[HOSTLEN+1], struct SOCKADDR_IN *sa)
 int
 inet_ntoa_r (struct in_addr in, char *buf, size_t buflen)
 {
-	u_int32_t addr = in.s_addr;
-	register u_int8_t *addr_p = (u_int8_t *)&addr, *t;
+	uint32_t addr = in.s_addr;
+	register uint8_t *addr_p = (uint8_t *)&addr, *t;
 	register unsigned int i, pos;
-	u_int8_t tmp[4];
+	uint8_t tmp[4];
 
 	for (i = 4, pos = 0; ; addr_p++) {
 		i--;

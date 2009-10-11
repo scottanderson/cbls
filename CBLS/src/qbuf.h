@@ -8,13 +8,13 @@
 #ifndef QBUF_H_
 #define QBUF_H_
 
-#include "sys_types.h"
+#include <stdint.h>
 
 struct qbuf {
-	u_int32_t pos, len;
-	u_int8_t *buf;
+	uint32_t pos, len;
+	uint8_t *buf;
 };
 
-void qbuf_set (struct qbuf *q, u_int32_t pos, u_int32_t len);
+void qbuf_set (struct qbuf *q, uint32_t pos, uint32_t len);
 
 #endif /* QBUF_H_ */

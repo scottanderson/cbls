@@ -8,9 +8,9 @@
 #ifndef CBLS_TIMER_H_
 #define CBLS_TIMER_H_
 
+#include <stdint.h>
 #include "sys_net.h"
 #include "sys_deps.h"
-#include "sys_types.h"
 
 struct timer {
 	struct timer *next;
@@ -18,7 +18,7 @@ struct timer {
 	struct timeval tv;
 	int (*fn)();
 	void *ptr;
-	u_int8_t expire;
+	uint8_t expire;
 };
 
 extern struct timer *timer_list;

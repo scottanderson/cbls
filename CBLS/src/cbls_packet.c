@@ -63,22 +63,22 @@ read_raw(struct packet_reader *pr, void *dest, int len) {
 }
 
 int
-read_byte(struct packet_reader *pr, u_int8_t *dest) {
+read_byte(struct packet_reader *pr, uint8_t *dest) {
 	return read_raw(pr, dest, 1);
 }
 
 int
-read_word(struct packet_reader *pr, u_int16_t *dest) {
+read_word(struct packet_reader *pr, uint16_t *dest) {
 	return read_raw(pr, dest, 2);
 }
 
 int
-read_dword(struct packet_reader *pr, u_int32_t *dest) {
+read_dword(struct packet_reader *pr, uint32_t *dest) {
 	return read_raw(pr, dest, 4);
 }
 
 int
-read_qword(struct packet_reader *pr, u_int64_t *dest) {
+read_qword(struct packet_reader *pr, uint64_t *dest) {
 	return read_raw(pr, dest, 8);
 }
 
@@ -123,7 +123,7 @@ void
 read_end(struct packet_reader *pr) {
 	struct qbuf *in = &pr->cbls->in;
 	/* copy the length out of the packet, because we can't point to it after memmove */
-	u_int16_t packet_len = pr->ih->len;
+	uint16_t packet_len = pr->ih->len;
 
 	if(in->pos != packet_len)
 		memmove(&in->buf[0], &in->buf[packet_len], in->pos - packet_len);
@@ -163,22 +163,22 @@ write_raw(struct packet_writer *pw, void *data, int len) {
 }
 
 void
-write_byte(struct packet_writer *pw, u_int8_t value) {
+write_byte(struct packet_writer *pw, uint8_t value) {
 	write_raw(pw, &value, 1);
 }
 
 void
-write_word(struct packet_writer *pw, u_int16_t value) {
+write_word(struct packet_writer *pw, uint16_t value) {
 	write_raw(pw, &value, 2);
 }
 
 void
-write_dword(struct packet_writer *pw, u_int32_t value) {
+write_dword(struct packet_writer *pw, uint32_t value) {
 	write_raw(pw, &value, 4);
 }
 
 void
-write_qword(struct packet_writer *pw, u_int64_t value) {
+write_qword(struct packet_writer *pw, uint64_t value) {
 	write_raw(pw, &value, 8);
 }
 

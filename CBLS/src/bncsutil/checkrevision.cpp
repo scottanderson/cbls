@@ -138,7 +138,7 @@ const char* get_basename(const char* file_name)
 }
 
 MEXP(int) checkRevision(const char* formula, const char* files[], int numFiles,
-	int mpqNumber, unsigned long* checksum)
+	int mpqNumber, uint32_t* checksum)
 {
 	uint64_t values[4];
 	long ovd[4], ovs1[4], ovs2[4];
@@ -318,7 +318,7 @@ MEXP(int) checkRevision(const char* formula, const char* files[], int numFiles,
 }
 
 MEXP(int) checkRevisionFlat(const char* valueString, const char* file1,
-const char* file2, const char* file3, int mpqNumber, unsigned long* checksum)
+const char* file2, const char* file3, int mpqNumber, uint32_t* checksum)
 {
 	const char* files[] =
 		{file1, file2, file3};
