@@ -5,21 +5,16 @@
  *      Author: Scott
  */
 
+#include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 #include "sys_net.h"
-#include "sys_deps.h"
 #include "inetlib.h"
 #include "xmalloc.h"
 #include "cbls_server.h"
 #include "cbls_fd.h"
 #include "cbls_timer.h"
-
-#if defined(__APPLE__)
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#endif
 
 int cbls_open_max = 0;
 struct cbls_file *cbls_files = 0;

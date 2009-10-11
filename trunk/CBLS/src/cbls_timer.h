@@ -8,8 +8,8 @@
 #ifndef CBLS_TIMER_H_
 #define CBLS_TIMER_H_
 
-#include <time.h>
 #include "sys_net.h"
+#include "sys_deps.h"
 #include "sys_types.h"
 
 struct timer {

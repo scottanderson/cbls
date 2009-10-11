@@ -26,6 +26,9 @@ gettimeofday (struct timeval *tv, void *xxx __attribute__((__unused__)))
 #define socket_write(a,b,c) send(a,b,c,0)
 #define socket_errno() (WSAGetLastError())
 #else
+#if defined(__APPLE__)
+#include <unistd.h>
+#endif
 #define SYS_open(x,y,z) open(x,y,z)
 #define SYS_mkdir(x,y) mkdir(x,y)
 #define SYS_fsync(x) fsync(x)
