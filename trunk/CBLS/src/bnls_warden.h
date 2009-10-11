@@ -56,11 +56,11 @@
  */
 #define WARDEN_RESULT_REQUEST_CORRUPT 0xFF
 
-void snd_warden(struct cbls_conn *cbls, u_int8_t command, u_int32_t cookie, u_int16_t data_len, void *data);
-void snd_warden_error(struct cbls_conn *cbls, u_int8_t command, u_int32_t cookie, u_int8_t result);
-void bnls_warden_0(struct packet_reader *pr, u_int32_t cookie);
-void bnls_warden_1(struct packet_reader *pr, u_int32_t cookie);
-void bnls_warden_2(struct packet_reader *pr, u_int32_t cookie);
-void bnls_warden_3(struct packet_reader *pr, u_int32_t cookie);
+void snd_warden(struct cbls_conn *cbls, uint8_t command, uint32_t cookie, uint16_t data_len, void *data);
+void snd_warden_error(struct cbls_conn *cbls, uint8_t command, uint32_t cookie, uint8_t result);
+void bnls_warden_0(struct packet_reader *pr, uint32_t cookie);
+void bnls_warden_1(struct packet_reader *pr, uint32_t cookie);
+void bnls_warden_2(struct packet_reader *pr, uint32_t cookie);
+void bnls_warden_3(struct packet_reader *pr, uint32_t cookie);
 
 #endif /* BNLS_WARDEN_H_ */

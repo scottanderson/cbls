@@ -21,12 +21,12 @@ struct cbls_conn {
 	struct qbuf read_in;
 	struct SOCKADDR_IN sockaddr;
 
-	u_int16_t uid;
+	uint16_t uid;
 
 	struct timeval login_tv;
 	struct timeval idle_tv;
 
-	u_int32_t nls_rev;
+	uint32_t nls_rev;
 	nls_t *nls;
 	char *new_password;
 };

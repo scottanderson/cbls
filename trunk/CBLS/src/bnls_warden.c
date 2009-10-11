@@ -9,7 +9,7 @@
 #include "bnls_warden.h"
 
 void __inline__
-snd_warden(struct cbls_conn *cbls, u_int8_t command, u_int32_t cookie, u_int16_t data_len, void *data) {
+snd_warden(struct cbls_conn *cbls, uint8_t command, uint32_t cookie, uint16_t data_len, void *data) {
 	struct packet_writer pw;
 	write_init(&pw, cbls, BNLS_WARDEN, 8 + data_len);
 	write_byte(&pw, command);
@@ -21,7 +21,7 @@ snd_warden(struct cbls_conn *cbls, u_int8_t command, u_int32_t cookie, u_int16_t
 }
 
 void __inline__
-snd_warden_error(struct cbls_conn *cbls, u_int8_t command, u_int32_t cookie, u_int8_t result) {
+snd_warden_error(struct cbls_conn *cbls, uint8_t command, uint32_t cookie, uint8_t result) {
 	struct packet_writer pw;
 	write_init(&pw, cbls, BNLS_WARDEN, 8);
 	write_byte(&pw, command);
@@ -32,7 +32,7 @@ snd_warden_error(struct cbls_conn *cbls, u_int8_t command, u_int32_t cookie, u_i
 }
 
 void
-bnls_warden_0(struct packet_reader *pr, u_int32_t cookie) {
+bnls_warden_0(struct packet_reader *pr, uint32_t cookie) {
 	/**
 	 * (DWORD)  Client
 	 * (WORD)   Length of Seed (should be 4 always)
@@ -41,11 +41,11 @@ bnls_warden_0(struct packet_reader *pr, u_int32_t cookie) {
 	 * (WORD)   Length of password
 	 * (VOID)   Password
 	 */
-	u_int32_t client;
-	u_int16_t seed_len;
+	uint32_t client;
+	uint16_t seed_len;
 	void *seed;
 	char *username;
-	u_int16_t password_len;
+	uint16_t password_len;
 	void *password;
 
 	if(!read_dword(pr, &client)
@@ -63,12 +63,12 @@ bnls_warden_0(struct packet_reader *pr, u_int32_t cookie) {
 }
 
 void
-bnls_warden_1(struct packet_reader *pr, u_int32_t cookie) {
+bnls_warden_1(struct packet_reader *pr, uint32_t cookie) {
 	/**
 	 * (WORD) Lengh Of Warden Packet
 	 * (VOID) Warden Packet Data
 	 */
-	u_int16_t payload_len;
+	uint16_t payload_len;
 	void *payload;
 
 	if(!read_word(pr, &payload_len)
@@ -82,7 +82,7 @@ bnls_warden_1(struct packet_reader *pr, u_int32_t cookie) {
 }
 
 void
-bnls_warden_2(struct packet_reader *pr, u_int32_t cookie) {
+bnls_warden_2(struct packet_reader *pr, uint32_t cookie) {
 	/**
 	 * (DWORD)    Client
 	 * (WORD)     Lengh Of Seed
@@ -92,12 +92,12 @@ bnls_warden_2(struct packet_reader *pr, u_int32_t cookie) {
 	 * (WORD)     Lengh of Warden 0x05 packet
 	 * (VOID)     Warden 0x05 packet
 	 */
-	u_int32_t client;
-	u_int16_t seed_len;
+	uint32_t client;
+	uint16_t seed_len;
 	void *seed;
-	u_int32_t unused;
+	uint32_t unused;
 	void *mod_md5_name;
-	u_int16_t payload_len;
+	uint16_t payload_len;
 	void *payload;
 
 	if(!read_dword(pr, &client)
@@ -116,16 +116,16 @@ bnls_warden_2(struct packet_reader *pr, u_int32_t cookie) {
 }
 
 void
-bnls_warden_3(struct packet_reader *pr, u_int32_t cookie) {
+bnls_warden_3(struct packet_reader *pr, uint32_t cookie) {
 	/**
 	 * (DWORD)    Client
 	 * (DWORD)    Info Type (0x01)
 	 * (WORD)     Unused (must be 0x00)
 	 * (VOID)     Unused
 	 */
-	u_int32_t client;
-	u_int32_t info_type;
-	u_int16_t unused;
+	uint32_t client;
+	uint32_t info_type;
+	uint16_t unused;
 
 	if(!read_dword(pr, &client)
 	|| !read_dword(pr, &info_type)

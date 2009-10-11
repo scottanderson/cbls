@@ -13,10 +13,10 @@
 extern void cbls_log (const char *fmt, ...);
 
 // cbls->read_in has new data off the wire; copy data to cbls->in
-u_int32_t
+uint32_t
 decode (struct qbuf *qdst, struct qbuf *qsrc)
 {
-	u_int32_t len, max, inused, inlen;
+	uint32_t len, max, inused, inlen;
 
 	inlen = qsrc->len;
 	if (!inlen)

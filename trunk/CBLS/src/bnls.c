@@ -36,18 +36,18 @@ gamestr(int prod) {
 }
 
 typedef struct {
-	u_int32_t client_token;
-	u_int32_t server_token;
+	uint32_t client_token;
+	uint32_t server_token;
 	char *cdkey;
-	u_int8_t success;
-	u_int32_t hash[9];
+	uint8_t success;
+	uint32_t hash[9];
 } key_hash_t;
 
 void key_hash(key_hash_t *key) {
-	u_int32_t *d_keylen = &key->hash[0];
-	u_int32_t *d_prod = &key->hash[1];
-	u_int32_t *d_pub = &key->hash[2];
-	u_int32_t *d_unused = &key->hash[3];
+	uint32_t *d_keylen = &key->hash[0];
+	uint32_t *d_prod = &key->hash[1];
+	uint32_t *d_pub = &key->hash[2];
+	uint32_t *d_unused = &key->hash[3];
 	char *d_buf = (char*)&key->hash[4];
 
 	key->success = !kd_quick(key->cdkey, key->client_token, key->server_token,
@@ -64,7 +64,7 @@ void key_hash(key_hash_t *key) {
 }
 
 typedef struct {
-	u_int32_t ver_byte;
+	uint32_t ver_byte;
 	char *f_game;
 	char *f_snp;
 	char *f_storm;
@@ -74,7 +74,7 @@ typedef struct {
 static hash_files_t *hash_files = 0;
 
 hash_files_t*
-get_hashes(u_int32_t prod) {
+get_hashes(uint32_t prod) {
 	if((prod < PRODUCT_FIRST) || (prod > PRODUCT_LAST))
 		return 0;
 
@@ -418,8 +418,8 @@ bnls_upgradeproof(struct packet_reader *pr) {
 	 * (DWORD[8]) New Password Salt
 	 * (DWORD[8]) New Password Verifier
 	 */
-	u_int32_t client_token;
-	u_int32_t old_pw_hash[5], new_pw_salt[8], new_pw_verifier[8];
+	uint32_t client_token;
+	uint32_t old_pw_hash[5], new_pw_salt[8], new_pw_verifier[8];
 
 	if(!read_dword(pr, &client_token)
 	|| !read_raw(pr, old_pw_hash, 20)
@@ -447,7 +447,7 @@ bnls_versioncheck(struct packet_reader *pr) {
 	 * (DWORD)  Version DLL digit in the range 0-7 (For example, for IX86Ver1.mpq, the digit is 1)
 	 * (STRING) Checksum Formula
 	 */
-	u_int32_t product_id, version_dll;
+	uint32_t product_id, version_dll;
 	char *checksum_formula;
 
 	if(!read_dword(pr, &product_id)
@@ -460,7 +460,7 @@ bnls_versioncheck(struct packet_reader *pr) {
 
 	/***/
 	cbls_log("[%u] BNLS_VERSIONCHECK %s %u", cbls->uid, gamestr(product_id), version_dll);
-	u_int32_t success, version, checksum;
+	uint32_t success, version, checksum;
 	hash_files_t *hashes;
 	char statstr[128];
 
@@ -551,12 +551,12 @@ bnls_hashdata(struct packet_reader *pr) {
 	 * (DWORD) Server key. Present only if HASHDATA_FLAG_DOUBLEHASH (0x02) is specified.
 	 * (DWORD) Cookie. Present only if HASHDATA_FLAG_COOKIE (0x04) is specified.
 	 */
-	u_int32_t data_len;
-	u_int32_t flags;
+	uint32_t data_len;
+	uint32_t flags;
 	void *data;
-	u_int32_t client_key;
-	u_int32_t server_key;
-	u_int32_t cookie;
+	uint32_t client_key;
+	uint32_t server_key;
+	uint32_t cookie;
 
 	if(!read_dword(pr, &data_len)
 	|| !read_dword(pr, &flags)
@@ -582,11 +582,11 @@ bnls_hashdata(struct packet_reader *pr) {
 
 	/***/
 	cbls_log("[%u] BNLS_HASHDATA", cbls->uid);
-	u_int32_t hash[5];
+	uint32_t hash[5];
 	calcHashBuf(data, data_len, (void*)hash);
 	if(flags & 0x02) {
 		int i;
-		u_int32_t dbl_hash[7];
+		uint32_t dbl_hash[7];
 		dbl_hash[0] = client_key;
 		dbl_hash[1] = server_key;
 		for(i = 0; i < 5; i++)
@@ -644,8 +644,8 @@ bnls_cdkey_ex(struct packet_reader *pr) {
 	 * flag is specified, the Cookie cannot be echoed. (It must still be included in the request.)
 	 */
 	int i;
-	u_int32_t cookie, flags;
-	u_int8_t num_keys;
+	uint32_t cookie, flags;
+	uint8_t num_keys;
 	key_hash_t *keys;
 
 	if(!read_dword(pr, &cookie)
@@ -671,7 +671,7 @@ bnls_cdkey_ex(struct packet_reader *pr) {
 		}
 	} else {
 		// One server key
-		u_int32_t server_token;
+		uint32_t server_token;
 		if(!read_dword(pr, &server_token)) {
 			xfree(keys);
 			cbls_close(cbls);
@@ -684,7 +684,7 @@ bnls_cdkey_ex(struct packet_reader *pr) {
 	if(flags & 0x02) { // CDKEY_GIVEN_SESSION_KEY
 		if(flags & 0x01) { // CDKEY_SAME_SESSION_KEY
 			// One client key
-			u_int32_t client_token;
+			uint32_t client_token;
 			if(!read_dword(pr, &client_token)) {
 				xfree(keys);
 				cbls_close(cbls);
@@ -703,7 +703,7 @@ bnls_cdkey_ex(struct packet_reader *pr) {
 	} else {
 		// Generate our own client keys
 		for(i = 0; i < num_keys; i++)
-			keys[i].client_token = (u_int32_t)rand();
+			keys[i].client_token = (uint32_t)rand();
 	}
 
 	for(i = 0; i < num_keys; i++) {
@@ -715,8 +715,8 @@ bnls_cdkey_ex(struct packet_reader *pr) {
 	}
 
 	/***/
-	u_int32_t num_success = 0;
-	u_int32_t success_bitmask = 0;
+	uint32_t num_success = 0;
+	uint32_t success_bitmask = 0;
 	for(i = 0; i < num_keys; i++) {
 		key_hash(&keys[i]);
 		if(keys[i].success) {
@@ -768,7 +768,7 @@ bnls_choosenlsrevision(struct packet_reader *pr) {
 	/**
 	 * (DWORD) NLS Revision Number
 	 */
-	u_int32_t nls_rev;
+	uint32_t nls_rev;
 	if(!read_dword(pr, &nls_rev)) {
 		cbls_close(cbls);
 		return;
@@ -842,7 +842,7 @@ bnls_requestversionbyte(struct packet_reader *pr) {
 	/**
 	 * (DWORD) Product ID
 	 */
-	u_int32_t prod;
+	uint32_t prod;
 	if(!read_dword(pr, &prod)) {
 		prod = 0;
 	}
@@ -877,7 +877,7 @@ bnls_verifyserver(struct packet_reader *pr) {
 
 	/***/
 	cbls_log("[%u] BNLS_VERIFYSERVER unimplemented", cbls->uid);
-	u_int32_t success = 0;
+	uint32_t success = 0;
 
 	/**
 	 * (BOOLEAN) Success
@@ -898,7 +898,7 @@ bnls_reserveserverslots(struct packet_reader *pr) {
 
 	/***/
 	cbls_log("[%u] BNLS_RESERVESERVERSLOTS unimplemented", cbls->uid);
-	u_int32_t slots = 0;
+	uint32_t slots = 0;
 
 	/**
 	 * (DWORD) Number of slots reserved
@@ -961,10 +961,10 @@ bnls_versioncheckex(struct packet_reader *pr) {
 	 * (DWORD)  Cookie
 	 * (STRING) Checksum Formula
 	 */
-	u_int32_t productid;
-	u_int32_t version_dll;
-	u_int32_t flags;
-	u_int32_t cookie;
+	uint32_t productid;
+	uint32_t version_dll;
+	uint32_t flags;
+	uint32_t cookie;
 	char *checksum_formula;
 
 	if (!read_dword(pr, &productid)
@@ -1011,10 +1011,10 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 	 * (STRING) Version Check Archive Filename
 	 * (STRING) Checksum Formula
 	 */
-	u_int32_t product_id;
-	u_int32_t flags;
-	u_int32_t cookie;
-	u_int64_t timestamp;
+	uint32_t product_id;
+	uint32_t flags;
+	uint32_t cookie;
+	uint64_t timestamp;
 	char *vc_filename;
 	char *checksum_formula;
 
@@ -1036,7 +1036,7 @@ bnls_versioncheckex2(struct packet_reader *pr) {
 
 	/***/
 	cbls_log("[%u] BNLS_VERSIONCHECKEX2 %s %s", cbls->uid, gamestr(product_id), vc_filename);
-	u_int32_t success, version, checksum;
+	uint32_t success, version, checksum;
 	char statstr[128];
 	memset(statstr, 0, 128);
 	success = 0;
@@ -1117,8 +1117,8 @@ bnls_warden(struct packet_reader *pr) {
 	 * (BYTE)  Command
 	 * (DWORD) Cookie
 	 */
-	u_int8_t command;
-	u_int32_t cookie;
+	uint8_t command;
+	uint32_t cookie;
 	if(!read_byte(pr, &command)
 	|| !read_dword(pr, &cookie)) {
 		snd_warden_error(pr->cbls, 0, cookie, WARDEN_RESULT_REQUEST_CORRUPT);

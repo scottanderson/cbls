@@ -59,7 +59,7 @@ MEXP(int) checkRevision(
     const char* files[],
     int numFiles,
     int mpqNumber,
-    unsigned long* checksum
+    uint32_t* checksum
 );
 
 /**
@@ -74,7 +74,7 @@ MEXP(int) checkRevisionFlat(
 	const char* file2,
 	const char* file3,
     int mpqNumber,
-    unsigned long* checksum
+    uint32_t* checksum
 );
 
 /**

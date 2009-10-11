@@ -15,8 +15,8 @@
 #include "cbls_protocol.h"
 #include "cbls_timer.h"
 
-u_int16_t ncbls_conns = 0;
-u_int16_t cbls_conn_counter = 0;
+uint16_t ncbls_conns = 0;
+uint16_t cbls_conn_counter = 0;
 
 struct cbls_conn __cbls_list, *cbls_list = &__cbls_list, *cbls_tail = &__cbls_list;
 
