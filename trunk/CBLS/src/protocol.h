@@ -11,6 +11,8 @@
 #include "cbls.h"
 
 uint32_t decode (struct qbuf *qdst, struct qbuf *qsrc);
-void cbls_protocol_rcv(struct cbls_conn *cbls);
+void cbls_protocol_decide(struct cbls_conn *cbls);
+void bnls_protocol_rcv(struct cbls_conn *cbls);
+void http_protocol_rcv(struct cbls_conn *cbls);
 
 #endif /* PROTOCOL_H_ */

@@ -1,5 +1,5 @@
 /*
- * bindump.c
+ * debug.c
  *
  *  Created on: Sep 28, 2009
  *      Author: Scott

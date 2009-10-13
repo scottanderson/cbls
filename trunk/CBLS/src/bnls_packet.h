@@ -1,12 +1,12 @@
 /*
- * cbls_packet.h
+ * bnls_packet.h
  *
  *  Created on: Sep 30, 2009
  *      Author: Scott
  */
 
-#ifndef CBLS_PACKET_H_
-#define CBLS_PACKET_H_
+#ifndef BNLS_PACKET_H_
+#define BNLS_PACKET_H_
 
 #include "cbls.h"
 

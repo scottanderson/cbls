@@ -5,7 +5,7 @@
  *      Author: Scott
  */
 
-#include "cbls_timer.h"
+#include "timer.h"
 #include "xmalloc.h"
 
 struct timer *timer_list = 0;

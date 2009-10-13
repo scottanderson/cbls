@@ -8,7 +8,7 @@
 #ifndef BNLS_H_
 #define BNLS_H_
 
-#include "cbls_packet.h"
+#include "bnls_packet.h"
 
 #ifndef PACKED
 #ifdef __GNUC__

@@ -1,13 +1,15 @@
 /*
- * cbls_protocol.c
+ * protocol.c
  *
  *  Created on: Sep 20, 2009
  *      Author: Scott
  */
 
 #include <string.h>
+#include "protocol.h"
 #include "cbls_server.h"
 #include "bnls.h"
+#include "http.h"
 #include "debug.h"
 
 extern void cbls_log (const char *fmt, ...);
@@ -54,7 +56,18 @@ decode (struct qbuf *qdst, struct qbuf *qsrc)
 }
 
 void
-cbls_protocol_rcv(struct cbls_conn *cbls)
+cbls_protocol_decide(struct cbls_conn *cbls) {
+	if(cbls->in.pos < 3)
+		return;
+	if(!memcmp(cbls->in.buf, "GET", 3))
+		cbls->rcv = http_protocol_rcv;
+	else
+		cbls->rcv = bnls_protocol_rcv;
+	cbls->rcv(cbls);
+}
+
+void
+bnls_protocol_rcv(struct cbls_conn *cbls)
 {
 	while(cbls->in.pos >= SIZEOF_BNLS_HDR) {
 		struct packet_reader pr;
@@ -190,5 +203,16 @@ cbls_protocol_rcv(struct cbls_conn *cbls)
 
 		// Remove the packet from the buffer
 		read_end(&pr);
+	}
+}
+
+#include "cbls_fd.h"
+
+void
+http_protocol_rcv(struct cbls_conn *cbls) {
+	int i;
+	if(i = decode(&cbls->out, &cbls->in)) {
+		cbls_log("[%u] decoded %u bytes", cbls->uid, i);
+		cbls_fd_set(cbls->fd, FDW);
 	}
 }

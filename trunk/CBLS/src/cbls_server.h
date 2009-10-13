@@ -1,12 +1,12 @@
 /*
- * cbls.h
+ * cbls_server.h
  *
  *  Created on: Sep 15, 2009
  *      Author: Scott
  */
 
-#ifndef CBLS_H_INCLUDED
-#define CBLS_H_INCLUDED
+#ifndef CBLS_SERVER_H_
+#define CBLS_SERVER_H_
 
 #include "cbls.h"
 
