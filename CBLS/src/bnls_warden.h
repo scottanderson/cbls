@@ -2,7 +2,7 @@
  * bnls_warden.h
  *
  *  Created on: Oct 8, 2009
- *      Author: sanderson
+ *      Author: Scott
  */
 
 #ifndef BNLS_WARDEN_H_

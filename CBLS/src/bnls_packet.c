@@ -1,5 +1,5 @@
 /*
- * cbls_packet.c
+ * bnls_packet.c
  *
  *  Created on: Sep 30, 2009
  *      Author: Scott

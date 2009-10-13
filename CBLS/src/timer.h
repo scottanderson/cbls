@@ -1,12 +1,12 @@
 /*
- * cbls_timer.h
+ * timer.h
  *
  *  Created on: Oct 8, 2009
  *      Author: Scott
  */
 
-#ifndef CBLS_TIMER_H_
-#define CBLS_TIMER_H_
+#ifndef TIMER_H_
+#define TIMER_H_
 
 #include <stdint.h>
 #include "sys_net.h"

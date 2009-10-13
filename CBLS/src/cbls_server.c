@@ -1,5 +1,5 @@
 /*
- * cbls.c
+ * cbls_server.c
  *
  *  Created on: Sep 15, 2009
  *      Author: Scott
@@ -15,7 +15,7 @@
 #include "xmalloc.h"
 #include "cbls_server.h"
 #include "cbls_fd.h"
-#include "cbls_timer.h"
+#include "timer.h"
 
 int cbls_open_max = 0;
 struct cbls_file *cbls_files = 0;

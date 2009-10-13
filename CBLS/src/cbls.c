@@ -12,8 +12,8 @@
 #include "inetlib.h"
 #include "cbls_fd.h"
 #include "cbls_server.h"
-#include "cbls_protocol.h"
-#include "cbls_timer.h"
+#include "protocol.h"
+#include "timer.h"
 
 uint16_t ncbls_conns = 0;
 uint16_t cbls_conn_counter = 0;
@@ -188,7 +188,7 @@ cbls_accepted (struct cbls_conn *cbls)
 	cbls_files[s].ready_write = cbls_write;
 	cbls_files[s].conn.cbls = cbls;
 
-	cbls->rcv = cbls_protocol_rcv;
+	cbls->rcv = cbls_protocol_decide;
 
 	timer_add_secs(10, cbls_timeout, cbls);
 
