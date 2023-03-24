@@ -11,9 +11,9 @@
 #include "cbls.h"
 
 struct packet_reader {
-	struct cbls_conn *cbls;
-	struct bnls_hdr *ih;
-	int pos;
+    struct cbls_conn *cbls;
+    struct bnls_hdr *ih;
+    int pos;
 };
 
 void read_init(struct packet_reader *pr, struct cbls_conn *cbls);
@@ -29,9 +29,9 @@ char* read_string(struct packet_reader *pr);
 void read_end(struct packet_reader *pr);
 
 struct packet_writer {
-	struct cbls_conn *cbls;
-	struct bnls_hdr *oh;
-	int qbuf_offset;
+    struct cbls_conn *cbls;
+    struct bnls_hdr *oh;
+    int qbuf_offset;
 };
 
 void write_init(struct packet_writer *pw, struct cbls_conn *cbls, int packetid, int min_length);

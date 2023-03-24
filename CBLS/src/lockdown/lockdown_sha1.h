@@ -24,8 +24,8 @@ THE SOFTWARE. */
 /* Standard SHA1 stuff. */
 typedef struct
 {
-	int bitlen[2];
-	int state[32];
+    int bitlen[2];
+    int state[32];
 } LD_SHA1_CTX;
 
 #define ROL32(_val32, _nBits) (((_val32 & 0x1f)<<(_nBits))|((_val32 & 0x1f)>>(32-(_nBits))))

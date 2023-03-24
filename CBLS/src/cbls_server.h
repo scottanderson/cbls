@@ -11,12 +11,12 @@
 #include "cbls.h"
 
 struct cbls_file {
-	union {
-		void *ptr;
-		struct cbls_conn *cbls;
-	} conn;
-	void (*ready_read)(int fd);
-	void (*ready_write)(int fd);
+    union {
+        void *ptr;
+        struct cbls_conn *cbls;
+    } conn;
+    void (*ready_read)(int fd);
+    void (*ready_write)(int fd);
 };
 
 extern struct cbls_file *cbls_files;

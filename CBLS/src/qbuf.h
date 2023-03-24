@@ -11,8 +11,8 @@
 #include <stdint.h>
 
 struct qbuf {
-	uint32_t pos, len;
-	uint8_t *buf;
+    uint32_t pos, len;
+    uint8_t *buf;
 };
 
 void qbuf_set (struct qbuf *q, uint32_t pos, uint32_t len);

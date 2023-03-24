@@ -18,7 +18,7 @@ extern void cbls_fd_add (int fd);
 extern void cbls_fd_del (int fd);
 extern void cbls_fd_set (int fd, int rw);
 extern void cbls_fd_clr (int fd, int rw);
-#define FDR	1
-#define FDW	2
+#define FDR 1
+#define FDW 2
 
 #endif /* CBLS_FD_H_ */

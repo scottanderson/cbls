@@ -14,21 +14,21 @@
 #include "bncsutil/nls.h"
 
 struct cbls_conn {
-	struct cbls_conn *next, *prev;
-	int fd;
-	void (*rcv)(struct cbls_conn *);
-	struct qbuf in, out;
-	struct qbuf read_in;
-	struct SOCKADDR_IN sockaddr;
+    struct cbls_conn *next, *prev;
+    int fd;
+    void (*rcv)(struct cbls_conn *);
+    struct qbuf in, out;
+    struct qbuf read_in;
+    struct SOCKADDR_IN sockaddr;
 
-	uint16_t uid;
+    uint16_t uid;
 
-	struct timeval login_tv;
-	struct timeval idle_tv;
+    struct timeval login_tv;
+    struct timeval idle_tv;
 
-	uint32_t nls_rev;
-	nls_t *nls;
-	char *new_password;
+    uint32_t nls_rev;
+    nls_t *nls;
+    char *new_password;
 };
 
 struct cbls_conn *cbls_new (void);

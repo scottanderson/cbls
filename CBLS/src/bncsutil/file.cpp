@@ -46,7 +46,7 @@ file_t file_open(const char* filename, unsigned int mode)
 	DWORD open_mode;
 	//const char* sys_err;
 	size_t filename_buf_len;
-	
+
 	if (mode & FILE_READ) {
 		access = GENERIC_READ;
 		share_mode = FILE_SHARE_READ;
@@ -56,17 +56,17 @@ file_t file_open(const char* filename, unsigned int mode)
 		share_mode = 0;
 		open_mode = CREATE_ALWAYS;
 	}
-	
+
 	file = CreateFile(filename, access, share_mode, NULL, open_mode,
 		FILE_ATTRIBUTE_NORMAL, NULL);
-	
+
 	if (file == INVALID_HANDLE_VALUE) {
 		//sys_err = sys_error_msg();
 		//bncsutil_debug_message_a("Cannot open file \"%s\"; %s", filename, sys_err);
 		//free_sys_err_msg(sys_err);
 		return ((file_t) 0);
 	}
-	
+
 	try {
 		data = new _file;
 	} catch (std::bad_alloc) {
@@ -84,26 +84,26 @@ file_t file_open(const char* filename, unsigned int mode)
 		return (file_t) 0;
 	}
 	strncpy((char*) data->filename, filename, filename_buf_len);
-	
+
 	data->f = file;
-	
+
 	return data;
 }
 
 void file_close(file_t file)
 {
 	mapping_map::iterator it;
-	
+
 	if (!file) {
 		//bncsutil_debug_message_a("error: null pointer given to file_close");
 		return;
 	}
-	
+
 	for (it = file->mappings.begin(); it != file->mappings.end(); it++) {
 		UnmapViewOfFile((PVOID)(*it).first);
 		CloseHandle((*it).second);
 	}
-	
+
 	CloseHandle((HANDLE) file->f);
 	free((void*) file->filename);
 	delete file;
@@ -112,11 +112,11 @@ void file_close(file_t file)
 size_t file_read(file_t file, void* ptr, size_t size, size_t count)
 {
 	DWORD bytes_read;
-	
+
 	if (!ReadFile(file->f, ptr, (DWORD) (size * count), &bytes_read, NULL)) {
 		return (size_t) 0;
 	}
-	
+
 	return (size_t) bytes_read;
 }
 
@@ -124,10 +124,10 @@ size_t file_write(file_t file, const void* ptr, size_t size,
 	size_t count)
 {
 	DWORD bytes_written;
-	
+
 	if (!WriteFile(file->f, ptr, (DWORD) (size * count), &bytes_written, NULL))
 		return (size_t) 0;
-	
+
 	return (size_t) bytes_written;
 }
 
@@ -158,7 +158,7 @@ void* file_map(file_t file, size_t len, off_t offset)
 		//free_sys_err_msg(err);
 		return (void*) 0;
 	}
-	
+
 	file->mappings[base] = mapping;
 
 	return base;
@@ -168,17 +168,17 @@ void file_unmap(file_t file, const void* base)
 {
 	mapping_map::iterator item = file->mappings.find(base);
 	HANDLE mapping;
-	
+
 	if (item == file->mappings.end()) {
 		//bncsutil_debug_message_a("warning: failed to unmap the block starting at %p from %s; unknown block.", base, file->filename);
 		return;
 	}
-	
+
 	mapping = (*item).second;
-	
+
 	UnmapViewOfFile((PVOID)base);
 	CloseHandle(mapping);
-	
+
 	file->mappings.erase(item);
 }
 
@@ -191,15 +191,15 @@ file_t file_open(const char* filename, unsigned int mode_flags)
 	FILE* f;
 	size_t filename_buf_len;
 	//const char* err;
-	
+
 	if (mode_flags & FILE_WRITE)
 		mode[0] = 'w';
-	
+
 	f = fopen(filename, mode);
 	if (!f) {
 		return (file_t) 0;
 	}
-	
+
 	try {
 		data = new _file;
 	} catch (std::bad_alloc) {
@@ -219,25 +219,25 @@ file_t file_open(const char* filename, unsigned int mode_flags)
 		return (file_t) 0;
 	}
 	strcpy((char*) data->filename, filename);
-	
+
 	data->f = f;
-		
+
 	return data;
 }
 
 void file_close(file_t file)
 {
         mapping_map::iterator it;
-   
+
 	if (!file) {
 		//bncsutil_debug_message("error: null pointer given to file_close");
 		return;
 	}
-	
+
 	for (it = file->mappings.begin(); it != file->mappings.end(); it++) {
 		munmap((void*) (*it).first, (*it).second);
 	}
-	
+
 	fclose(file->f);
 	delete file;
 }
@@ -257,11 +257,11 @@ size_t file_size(file_t file)
 {
 	long cur_pos = ftell(file->f);
 	size_t size_of_file;
-	
+
 	fseek(file->f, 0, SEEK_END);
 	size_of_file = (size_t) ftell(file->f);
 	fseek(file->f, cur_pos, SEEK_SET);
-	
+
 	return size_of_file;
 }
 
@@ -270,16 +270,16 @@ void* file_map(file_t file, size_t len, off_t offset)
 	int fd = fileno(file->f);
 	void* base = mmap((void*) 0, len, PROT_READ, MAP_SHARED, fd, offset);
 	//const char* err;
-	
+
 	if (!base) {
 	   //err = sys_error_msg();
 		//bncsutil_debug_message_a("error: failed to map %u bytes of %s starting at %u into memory; %s", len, file->filename, offset,	err);
 		//free_sys_err_msg(err);
 		return (void*) 0;
 	}
-	
+
 	file->mappings[base] = len;
-	
+
 	return base;
 }
 
@@ -287,16 +287,16 @@ void file_unmap(file_t file, const void* base)
 {
 	mapping_map::iterator item = file->mappings.find(base);
 	size_t len;
-	
+
 	if (item == file->mappings.end()) {
 		//bncsutil_debug_message_a("warning: failed to unmap the block starting at %p from %s; unknown block.", base, file->filename);
 		return;
 	}
-	
+
 	len = (*item).second;
-	
+
 	munmap((void*) base, len);
-	
+
 	file->mappings.erase(item);
 }
 

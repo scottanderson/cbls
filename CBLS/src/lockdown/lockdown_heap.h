@@ -21,9 +21,9 @@ THE SOFTWARE. */
 #ifndef __LOCKDOWN_HEAP_H__
 #define __LOCKDOWN_HEAP_H__
 
-/* Lockdown stores lists of offsets or addresses in some heap memory that automatically grows. 
+/* Lockdown stores lists of offsets or addresses in some heap memory that automatically grows.
  * I've decided to refer to this as the "lockdown heap". Although it's not a heap in the actual
- * sense of the word, or any sense for that matter, it was the best word I icould think of at 
+ * sense of the word, or any sense for that matter, it was the best word I icould think of at
  * the time, and it kinda stuck with me. */
 
 #include <stdio.h>
@@ -33,9 +33,9 @@ THE SOFTWARE. */
 
 typedef struct
 {
-	char *memory;
-	int currentlength;
-	int maximumlength;
+    char *memory;
+    int currentlength;
+    int maximumlength;
 } t_lockdown_heap;
 
 t_lockdown_heap *ldheap_create();

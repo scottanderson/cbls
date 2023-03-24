@@ -90,7 +90,7 @@ int kd_lock_decoders() {
 	int err = 0;
 	pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 	struct timespec wait_time = {0, MUTEX_TIMEOUT_MS * 1000};
-	
+
 	err = pthread_cond_timedwait(&cond, &mutex, &wait_time);
     switch (err) {
         case 0:
@@ -116,17 +116,17 @@ MEXP(int) kd_quick(const char* cd_key, uint32_t client_token,
 {
 	CDKeyDecoder kd(cd_key, strlen(cd_key));
 	size_t hash_len;
-	
+
 	if (!kd.isKeyValid())
 		return 0;
-	
+
 	*public_value = kd.getVal1();
 	*product = kd.getProduct();
-	
+
 	hash_len = kd.calculateHash(client_token, server_token);
 	if (!hash_len || hash_len > buffer_len)
 		return 0;
-	
+
 	kd.getHash(hash_buffer);
 	return 1;
 }
@@ -136,7 +136,7 @@ MEXP(int) kd_init() {
 
 	if (has_run)
 		return 1;
-	
+
 #ifdef MOS_WINDOWS
 	/*mutex = CreateMutex(NULL, FALSE, NULL);
 	if (mutex == NULL)
@@ -226,7 +226,7 @@ MEXP(int) kd_create(char* cdkey, int keyLength) {
 		}
 		delete [] decoders;
 		decoders = new CDKeyDecoder*[sizeDecoders + DEFAULT_DECODERS_SIZE];
-		
+
 		for (unsigned int j = 0; j < sizeDecoders; j++) {
 			decoders[j] = temp[j];
 		}
@@ -241,7 +241,7 @@ MEXP(int) kd_create(char* cdkey, int keyLength) {
 		return -1;
 	}
 	kd_unlock_decoders();
-	
+
 	d = NULL;
 	return (int) i;
 }*/
@@ -260,7 +260,7 @@ MEXP(int) kd_free(int decoder) {
 
 	delete d;
 	*(decoders + decoder) = (CDKeyDecoder*) 0;
-	
+
 	kd_unlock_decoders();
 	return 1;
 }
@@ -279,7 +279,7 @@ MEXP(int) kd_val2Length(int decoder) {
 		return -1;
 
 	value = d->getVal2Length();
-	
+
 	kd_unlock_decoders();
 	return value;
 }
@@ -298,7 +298,7 @@ MEXP(int) kd_product(int decoder) {
 		return -1;
 
 	value = d->getProduct();
-	
+
 	kd_unlock_decoders();
 	return value;
 }
@@ -317,7 +317,7 @@ MEXP(int) kd_val1(int decoder) {
 		return -1;
 
 	value = d->getVal1();
-	
+
 	kd_unlock_decoders();
 	return value;
 }
@@ -336,7 +336,7 @@ MEXP(int) kd_val2(int decoder) {
 		return -1;
 
 	value = d->getVal2();
-	
+
 	kd_unlock_decoders();
 	return value;
 }
@@ -355,7 +355,7 @@ MEXP(int) kd_longVal2(int decoder, char* out) {
 		return -1;
 
 	value = d->getLongVal2(out);
-	
+
 	kd_unlock_decoders();
 	return value;
 }
@@ -376,7 +376,7 @@ MEXP(int) kd_calculateHash(int decoder, uint32_t clientToken,
 		return -1;
 
 	value = (int) d->calculateHash(clientToken, serverToken);
-	
+
 	kd_unlock_decoders();
 	return value;
 }
@@ -395,7 +395,7 @@ MEXP(int) kd_getHash(int decoder, char* out) {
 		return -1;
 
 	value = (int) d->getHash(out);
-	
+
 	kd_unlock_decoders();
 	return value;
 }
@@ -414,7 +414,7 @@ MEXP(int) kd_isValid(int decoder) {
 		return -1;
 
 	value = d->isKeyValid();
-	
+
 	kd_unlock_decoders();
 	return value;
 }

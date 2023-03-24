@@ -7,28 +7,28 @@
 
 #define IMAGE_DOS_SIGNATURE                 0x5A4D
 
-#define IMAGE_NT_SIGNATURE                  0x00004550  
+#define IMAGE_NT_SIGNATURE                  0x00004550
 
-typedef struct _IMAGE_DOS_HEADER {      
-    unsigned short   e_magic;                     
-    unsigned short   e_cblp;                     
-    unsigned short   e_cp;                       
-    unsigned short   e_crlc;                    
-    unsigned short   e_cparhdr;                   
-    unsigned short   e_minalloc;                 
-    unsigned short   e_maxalloc;                  
-    unsigned short   e_ss;                        
-    unsigned short   e_sp;                       
-    unsigned short   e_csum;                      
-    unsigned short   e_ip;                       
-    unsigned short   e_cs;                       
-    unsigned short   e_lfarlc;                   
-    unsigned short   e_ovno;                    
-    unsigned short   e_res[4];                   
-    unsigned short   e_oemid;                     
-    unsigned short   e_oeminfo;                   
-    unsigned short   e_res2[10];               
-    long   e_lfanew;                    
+typedef struct _IMAGE_DOS_HEADER {
+    unsigned short   e_magic;
+    unsigned short   e_cblp;
+    unsigned short   e_cp;
+    unsigned short   e_crlc;
+    unsigned short   e_cparhdr;
+    unsigned short   e_minalloc;
+    unsigned short   e_maxalloc;
+    unsigned short   e_ss;
+    unsigned short   e_sp;
+    unsigned short   e_csum;
+    unsigned short   e_ip;
+    unsigned short   e_cs;
+    unsigned short   e_lfarlc;
+    unsigned short   e_ovno;
+    unsigned short   e_res[4];
+    unsigned short   e_oemid;
+    unsigned short   e_oeminfo;
+    unsigned short   e_res2[10];
+    long   e_lfanew;
  } IMAGE_DOS_HEADER, *PIMAGE_DOS_HEADER;
 
 
@@ -64,7 +64,7 @@ typedef struct _IMAGE_OPTIONAL_HEADER {
     unsigned long   BaseOfCode;
     unsigned long   BaseOfData;
 
- 
+
     unsigned long   ImageBase;
     unsigned long   SectionAlignment;
     unsigned long   FileAlignment;
@@ -104,22 +104,22 @@ typedef struct _IMAGE_NT_HEADERS {
      ((PIMAGE_NT_HEADERS)(ntheader))->FileHeader.SizeOfOptionalHeader   \
     ))
 
-#define IMAGE_DIRECTORY_ENTRY_EXPORT          0   
-#define IMAGE_DIRECTORY_ENTRY_IMPORT          1   
-#define IMAGE_DIRECTORY_ENTRY_RESOURCE        2   
-#define IMAGE_DIRECTORY_ENTRY_EXCEPTION       3   
-#define IMAGE_DIRECTORY_ENTRY_SECURITY        4   
-#define IMAGE_DIRECTORY_ENTRY_BASERELOC       5   
-#define IMAGE_DIRECTORY_ENTRY_DEBUG           6   
+#define IMAGE_DIRECTORY_ENTRY_EXPORT          0
+#define IMAGE_DIRECTORY_ENTRY_IMPORT          1
+#define IMAGE_DIRECTORY_ENTRY_RESOURCE        2
+#define IMAGE_DIRECTORY_ENTRY_EXCEPTION       3
+#define IMAGE_DIRECTORY_ENTRY_SECURITY        4
+#define IMAGE_DIRECTORY_ENTRY_BASERELOC       5
+#define IMAGE_DIRECTORY_ENTRY_DEBUG           6
 
-#define IMAGE_DIRECTORY_ENTRY_ARCHITECTURE    7   
-#define IMAGE_DIRECTORY_ENTRY_GLOBALPTR       8   
-#define IMAGE_DIRECTORY_ENTRY_TLS             9   
-#define IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG    10   
-#define IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT   11   
-#define IMAGE_DIRECTORY_ENTRY_IAT            12   
-#define IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT   13   
-#define IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR 14   
+#define IMAGE_DIRECTORY_ENTRY_ARCHITECTURE    7
+#define IMAGE_DIRECTORY_ENTRY_GLOBALPTR       8
+#define IMAGE_DIRECTORY_ENTRY_TLS             9
+#define IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG    10
+#define IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT   11
+#define IMAGE_DIRECTORY_ENTRY_IAT            12
+#define IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT   13
+#define IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR 14
 
 
 #define IMAGE_SIZEOF_SHORT_NAME              8
@@ -145,7 +145,7 @@ typedef struct _IMAGE_SECTION_HEADER {
 typedef struct _IMAGE_RELOCATION {
     union {
         unsigned long   VirtualAddress;
-        unsigned long   RelocCount;             
+        unsigned long   RelocCount;
     };
     unsigned long   SymbolTableIndex;
     unsigned short    Type;

@@ -16,9 +16,9 @@
 static __inline__ void
 gettimeofday (struct timeval *tv, void *xxx __attribute__((__unused__)))
 {
-	time_t t = time(0);
-	tv->tv_sec = t;
-	tv->tv_usec = 0;
+    time_t t = time(0);
+    tv->tv_sec = t;
+    tv->tv_usec = 0;
 }
 #endif
 #define socket_close(x) closesocket(x)

@@ -13,12 +13,12 @@
 #include "sys_deps.h"
 
 struct timer {
-	struct timer *next;
-	struct timeval add_tv;
-	struct timeval tv;
-	int (*fn)();
-	void *ptr;
-	uint8_t expire;
+    struct timer *next;
+    struct timeval add_tv;
+    struct timeval tv;
+    int (*fn)();
+    void *ptr;
+    uint8_t expire;
 };
 
 extern struct timer *timer_list;

@@ -29,39 +29,39 @@
    The copyright notice above is copied from md5.h by L. Petet Deutsch
    <ghost@aladdin.com>. Thank him since I'm not a good speaker of English. :)
  */
-#ifndef	SHA1_H
-#define	SHA1_H
+#ifndef SHA1_H
+#define SHA1_H
 
-typedef	unsigned int	sha1_word_t;	/* 32bits unsigned integer */
-typedef unsigned char	sha1_byte_t;	/* 8bits unsigned integer */
-#define	BITS		8
+typedef unsigned int    sha1_word_t;    /* 32bits unsigned integer */
+typedef unsigned char   sha1_byte_t;    /* 8bits unsigned integer */
+#define BITS        8
 
 /* Define the state of SHA-1 algorithm */
 typedef struct {
-  sha1_byte_t	sha1_buf[64];	/* 512 bits */
-  int		sha1_count;	/* How many bytes are used */
-  sha1_word_t	sha1_size1;		/* Length counter Lower Word */
-  sha1_word_t	sha1_size2;		/* Length counter Upper Word */
-  sha1_word_t	sha1_h[5];		/* Hash output */
+  sha1_byte_t   sha1_buf[64];   /* 512 bits */
+  int       sha1_count; /* How many bytes are used */
+  sha1_word_t   sha1_size1;     /* Length counter Lower Word */
+  sha1_word_t   sha1_size2;     /* Length counter Upper Word */
+  sha1_word_t   sha1_h[5];      /* Hash output */
 } sha1_state_s;
-#define	SHA1_OUTPUT_SIZE	20	/* in bytes */
+#define SHA1_OUTPUT_SIZE    20  /* in bytes */
 
 /* External Functions */
 
-#ifdef	__cplusplus
+#ifdef  __cplusplus
 extern "C" {
 #endif
 
 /* Initialize SHA-1 algorithm */
-void	sha1_init(sha1_state_s *pms);
+void    sha1_init(sha1_state_s *pms);
 
 /* Append a string to SHA-1 algorithm */
-void	sha1_update(sha1_state_s *pms, sha1_byte_t *input_buffer, int length);
+void    sha1_update(sha1_state_s *pms, sha1_byte_t *input_buffer, int length);
 
 /* Finish the SHA-1 algorithm and return the hash */
-void	sha1_finish(sha1_state_s *pms, sha1_byte_t output[SHA1_OUTPUT_SIZE]);
+void    sha1_finish(sha1_state_s *pms, sha1_byte_t output[SHA1_OUTPUT_SIZE]);
 
-#ifdef	__cplusplus
+#ifdef  __cplusplus
 }
 #endif
 

@@ -32,7 +32,7 @@
 #include <string.h>
 #include "sha1.h"
 
-#define	INLINE	inline
+#define INLINE  inline
 /*
  * Packing bytes to a word
  *
@@ -62,8 +62,8 @@ static void unpackup(sha1_byte_t *p, sha1_word_t q)
  */
 static inline void sha1_update_now(sha1_state_s *pms, sha1_byte_t *bp)
 {
-  sha1_word_t	tmp, a, b, c, d, e, w[16+16];
-  int	i, s;
+  sha1_word_t   tmp, a, b, c, d, e, w[16+16];
+  int   i, s;
 
   /* pack 64 bytes into 16 words */
   for(i = 0; i < 16; i++) {
@@ -73,15 +73,15 @@ static inline void sha1_update_now(sha1_state_s *pms, sha1_byte_t *bp)
 
   a = pms->sha1_h[0], b = pms->sha1_h[1], c = pms->sha1_h[2], d = pms->sha1_h[3], e = pms->sha1_h[4];
 
-#define	rot(x,n) (((x) << n) | ((x) >> (32-n)))
-#define	f0(b, c, d)	((b&c)|(~b&d))
-#define	f1(b, c, d)	(b^c^d)
-#define	f2(b, c, d)	((b&c)|(b&d)|(c&d))
-#define	f3(b, c, d)	(b^c^d)
-#define k0		0x5a827999
-#define	k1		0x6ed9eba1
-#define	k2		0x8f1bbcdc
-#define	k3		0xca62c1d6
+#define rot(x,n) (((x) << n) | ((x) >> (32-n)))
+#define f0(b, c, d) ((b&c)|(~b&d))
+#define f1(b, c, d) (b^c^d)
+#define f2(b, c, d) ((b&c)|(b&d)|(c&d))
+#define f3(b, c, d) (b^c^d)
+#define k0      0x5a827999
+#define k1      0x6ed9eba1
+#define k2      0x8f1bbcdc
+#define k3      0xca62c1d6
 
   /* t=0-15 */
   s = 0;
@@ -135,7 +135,7 @@ static inline void sha1_update_now(sha1_state_s *pms, sha1_byte_t *bp)
  */
 static INLINE void incr(sha1_state_s *pms, int v)
 {
-  sha1_word_t	q;
+  sha1_word_t   q;
 
   q = pms->sha1_size1 + v * BITS;
   if(q < pms->sha1_size1) {
@@ -147,10 +147,10 @@ static INLINE void incr(sha1_state_s *pms, int v)
 /*
  * Initialize sha1_state_s as FIPS specifies
  */
-void	sha1_init(sha1_state_s *pms)
+void    sha1_init(sha1_state_s *pms)
 {
   memset(pms, 0, sizeof(*pms));
-  pms->sha1_h[0] = 0x67452301;	/* Initialize H[0]-H[4] */
+  pms->sha1_h[0] = 0x67452301;  /* Initialize H[0]-H[4] */
   pms->sha1_h[1] = 0xEFCDAB89;
   pms->sha1_h[2] = 0x98BADCFE;
   pms->sha1_h[3] = 0x10325476;
@@ -160,12 +160,12 @@ void	sha1_init(sha1_state_s *pms)
 /*
  * Fill block and update output when needed
  */
-void	sha1_update(sha1_state_s *pms, sha1_byte_t *bufp, int length)
+void    sha1_update(sha1_state_s *pms, sha1_byte_t *bufp, int length)
 {
   /* Is the buffer partially filled? */
   if(pms->sha1_count != 0) {
-    if(pms->sha1_count + length >= (signed) sizeof(pms->sha1_buf)) {	/* buffer is filled enough */
-      int fil = sizeof(pms->sha1_buf) - pms->sha1_count;		/* length to copy */
+    if(pms->sha1_count + length >= (signed) sizeof(pms->sha1_buf)) {    /* buffer is filled enough */
+      int fil = sizeof(pms->sha1_buf) - pms->sha1_count;        /* length to copy */
 
       memcpy(pms->sha1_buf + pms->sha1_count, bufp, fil);
       sha1_update_now(pms, pms->sha1_buf);
@@ -183,7 +183,7 @@ void	sha1_update(sha1_state_s *pms, sha1_byte_t *bufp, int length)
 
   /* Loop to update state */
   for(;;) {
-    if(length < (signed) sizeof(pms->sha1_buf)) {		/* Short to fill up the buffer */
+    if(length < (signed) sizeof(pms->sha1_buf)) {       /* Short to fill up the buffer */
       if(length) {
         memcpy(pms->sha1_buf, bufp, length);
       }
@@ -198,7 +198,7 @@ void	sha1_update(sha1_state_s *pms, sha1_byte_t *bufp, int length)
   }
 }
 
-void	sha1_finish(sha1_state_s *pms, sha1_byte_t output[SHA1_OUTPUT_SIZE])
+void    sha1_finish(sha1_state_s *pms, sha1_byte_t output[SHA1_OUTPUT_SIZE])
 {
   int i;
   sha1_byte_t buf[1];

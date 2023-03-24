@@ -22,7 +22,7 @@
  * write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
  * Boston, MA  02111-1307  USA
  */
- 
+
 #include "mutil.h"
 #include "checkrevision.h"
 #include "file.h"
@@ -68,14 +68,14 @@ std::vector<long> checkrevision_seeds;
 void initialize_checkrevision_seeds()
 {
 	static bool run = false;
-	
+
 	if (run)
 		return;
-	
+
 	run = true;
-	
+
 	checkrevision_seeds.reserve(8);
-	
+
 	checkrevision_seeds.push_back(0xE7F4CB62);
 	checkrevision_seeds.push_back(0xF6A14FFC);
 	checkrevision_seeds.push_back(0xAA5504AF);
@@ -93,21 +93,21 @@ MEXP(long) get_mpq_seed(int mpq_number)
 		//	"MPQ#%u", mpq_number);
 		return 0;
 	}
-	
+
 	return checkrevision_seeds[mpq_number];
 }
 
 MEXP(long) set_mpq_seed(int mpq_number, long new_seed)
 {
 	long ret;
-	
+
 	if (((size_t) mpq_number) >= checkrevision_seeds.size()) {
 		ret = 0;
 		checkrevision_seeds.reserve((size_t) mpq_number);
 	} else {
 		ret = checkrevision_seeds[mpq_number];
 	}
-	
+
 	checkrevision_seeds[mpq_number] = new_seed;
 	return ret;
 }
@@ -133,7 +133,7 @@ const char* get_basename(const char* file_name)
 		if (*base == '\\' || *base == '/')
 			break;
 	}
-	
+
 	return ++base;
 }
 
@@ -150,7 +150,7 @@ MEXP(int) checkRevision(const char* formula, const char* files[], int numFiles,
 	uint32_t* dwBuf;
 	uint32_t* current;
 	size_t seed_count;
-	
+
 #if DEBUG
 	int i;
 	bncsutil_debug_message_a("checkRevision(\"%s\", {", formula);
@@ -159,25 +159,25 @@ MEXP(int) checkRevision(const char* formula, const char* files[], int numFiles,
 	}
 	bncsutil_debug_message_a("}, %d, %d, %p);", numFiles, mpqNumber, checksum);
 #endif
-	
+
 	if (!formula || !files || numFiles == 0 || mpqNumber < 0 || !checksum) {
 		//bncsutil_debug_message("error: checkRevision() parameter sanity check "
 		//	"failed");
 		return 0;
 	}
-	
+
 	seed_count = checkrevision_seeds.size();
 	if (seed_count == 0) {
 		initialize_checkrevision_seeds();
 		seed_count = checkrevision_seeds.size();
 	}
-	
+
 	if (seed_count <= (size_t) mpqNumber) {
 		//bncsutil_debug_message_a("error: no revision check seed value defined "
 		//	"for MPQ number %d", mpqNumber);
 		return 0;
 	}
-	
+
 	token = formula;
 	while (token && *token) {
 		if (*(token + 1) == '=') {
@@ -187,7 +187,7 @@ MEXP(int) checkRevision(const char* formula, const char* files[], int numFiles,
 				//	" variable %c", *token);
 				return 0;
 			}
-			
+
 			token += 2; // skip over equals sign
 			if (BUCR_ISNUM(*token)) {
 				values[variable] = ATOL64(token);
@@ -205,7 +205,7 @@ MEXP(int) checkRevision(const char* formula, const char* files[], int numFiles,
 				curFormula++;
 			}
 		}
-		
+
 		for (; *token != 0; token++) {
 			if (*token == ' ') {
 				token++;
@@ -213,25 +213,25 @@ MEXP(int) checkRevision(const char* formula, const char* files[], int numFiles,
 			}
 		}
 	}
-	
+
 	// Actual hashing (yay!)
 	// "hash A by the hashcode"
 	values[0] ^= checkrevision_seeds[mpqNumber];
-	
+
 	for (int i = 0; i < numFiles; i++) {
 		size_t file_len, remainder, rounded_size, buffer_size;
-		
+
 		f = file_open(files[i], FILE_READ);
 		if (!f) {
 			//bncsutil_debug_message_a("error: Failed to open file %s",
 			//	files[i]);
 			return 0;
 		}
-		
+
 		file_len = file_size(f);
 		remainder = file_len % 1024;
 		rounded_size = file_len - remainder;
-		
+
 		file_buffer = (uint8_t*) file_map(f, file_len, 0);
 		if (!file_buffer) {
 			file_close(f);
@@ -239,7 +239,7 @@ MEXP(int) checkRevision(const char* formula, const char* files[], int numFiles,
 			//	files[i]);
 			return 0;
 		}
-		
+
 		if (remainder == 0) {
 			// Mapped buffer may be used directly, without padding.
 			dwBuf = (uint32_t*) file_buffer;
@@ -249,7 +249,7 @@ MEXP(int) checkRevision(const char* formula, const char* files[], int numFiles,
 			size_t extra = 1024 - remainder;
 			uint8_t pad = (uint8_t) 0xFF;
 			uint8_t* pad_dest;
-			
+
 			buffer_size = file_len + extra;
 			dwBuf = (uint32_t*) malloc(buffer_size);
 			if (!dwBuf) {
@@ -259,16 +259,16 @@ MEXP(int) checkRevision(const char* formula, const char* files[], int numFiles,
 				file_close(f);
 				return 0;
 			}
-			
+
 			memcpy(dwBuf, file_buffer, file_len);
 			file_unmap(f, file_buffer);
 			file_buffer = (uint8_t*) 0;
-			
+
 			pad_dest = ((uint8_t*) dwBuf) + file_len;
 			for (size_t j = file_len; j < buffer_size; j++) {
 				*pad_dest++ = pad--;
 			}
-			
+
 		}
 
 		current = dwBuf;
@@ -349,7 +349,7 @@ MEXP(int) getExeInfo(const char* file_name, char* exe_info,
 	struct stat st;
 	struct tm* time;
 #endif
-	
+
 	if (!file_name || !exe_info || !exe_info_size || !version)
 		return 0;
 
@@ -357,7 +357,7 @@ MEXP(int) getExeInfo(const char* file_name, char* exe_info,
 
 	switch (platform) {
 		case BNCSUTIL_PLATFORM_X86:
-#ifdef MOS_WINDOWS				
+#ifdef MOS_WINDOWS
 			infoSize = GetFileVersionInfoSize(file_name, &bytesRead);
 			if (infoSize == 0)
 				return 0;
@@ -369,11 +369,11 @@ MEXP(int) getExeInfo(const char* file_name, char* exe_info,
 				return 0;
 			if (!VerQueryValue(buf, "\\", (LPVOID*) &ffi, (PUINT) &infoSize))
 				return 0;
-			
+
 			*version =
 				((HIWORD(ffi->dwProductVersionMS) & 0xFF) << 24) |
 				((LOWORD(ffi->dwProductVersionMS) & 0xFF) << 16) |
-				((HIWORD(ffi->dwProductVersionLS) & 0xFF) << 8) | 
+				((HIWORD(ffi->dwProductVersionLS) & 0xFF) << 8) |
 				(LOWORD(ffi->dwProductVersionLS) & 0xFF);
 #if DEBUG
 			bncsutil_debug_message_a("%s version = %d.%d.%d.%d (0x%08X)",
@@ -393,7 +393,7 @@ MEXP(int) getExeInfo(const char* file_name, char* exe_info,
 				cm_pe_unload(pe);
 				return 0;
 			}
-				
+
 			for (i = 0; i < root->subdir_count; i++) {
 				dir = (root->subdirs + i);
 				if (dir->name == 16) {
@@ -410,7 +410,7 @@ MEXP(int) getExeInfo(const char* file_name, char* exe_info,
 			*version =
 				((HIWORD(ffi.dwProductVersionMS) & 0xFF) << 24) |
 				((LOWORD(ffi.dwProductVersionMS) & 0xFF) << 16) |
-				((HIWORD(ffi.dwProductVersionLS) & 0xFF) << 8) | 
+				((HIWORD(ffi.dwProductVersionLS) & 0xFF) << 8) |
 				(LOWORD(ffi.dwProductVersionLS) & 0xFF);
 #if DEBUG
 			bncsutil_debug_message_a("%s version = %d.%d.%d.%d (0x%08X)",
@@ -420,7 +420,7 @@ MEXP(int) getExeInfo(const char* file_name, char* exe_info,
 				(LOWORD(ffi.dwProductVersionLS) & 0xFF),
 				*version);
 #endif
-			
+
 			cm_pe_unload_resources(root);
 			cm_pe_unload(pe);
 #endif
@@ -442,7 +442,7 @@ MEXP(int) getExeInfo(const char* file_name, char* exe_info,
 			fclose(f);
 #endif
 	}
-	
+
 #ifdef MOS_WINDOWS
 	hFile = CreateFile(file_name, GENERIC_READ, FILE_SHARE_READ, NULL,
 					   OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -453,13 +453,13 @@ MEXP(int) getExeInfo(const char* file_name, char* exe_info,
 		CloseHandle(hFile);
 		return 0;
 	}
-	
+
 	if (!FileTimeToSystemTime(&ft, &st)) {
 		CloseHandle(hFile);
 		return 0;
 	}
 	CloseHandle(hFile);
-	
+
 	ret = snprintf(exe_info, exe_info_size,
 				   "%s %02u/%02u/%02u %02u:%02u:%02u %lu", base, st.wMonth,
 				   st.wDay, (st.wYear % 100), st.wHour, st.wMinute, st.wSecond,
@@ -476,14 +476,14 @@ MEXP(int) getExeInfo(const char* file_name, char* exe_info,
 	}
 	file_size = ftell(f);
 	fclose(f);
-	
+
 	if (stat(file_name, &st) != 0)
 		return 0;
-	
+
 	time = gmtime(&st.st_mtime);
 	if (!time)
 		return 0;
-	
+
 	switch (platform) {
 		case BNCSUTIL_PLATFORM_MAC:
 		case BNCSUTIL_PLATFORM_OSX:
@@ -491,9 +491,9 @@ MEXP(int) getExeInfo(const char* file_name, char* exe_info,
 				time->tm_year -= 100;
 			break;
 	}
-	
+
 	ret = (int) snprintf(exe_info, exe_info_size,
-						"%s %02u/%02u/%02u %02u:%02u:%02u %lu", base, 
+						"%s %02u/%02u/%02u %02u:%02u:%02u %lu", base,
 						(time->tm_mon+1), time->tm_mday, time->tm_year,
 						time->tm_hour, time->tm_min, time->tm_sec, file_size);
 #endif

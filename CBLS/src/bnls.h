@@ -19,17 +19,17 @@
 #endif
 
 #if defined(__GNUC__) && !defined(__STRICT_ANSI__)
-#define ZERO_SIZE_ARRAY_SIZE	0
+#define ZERO_SIZE_ARRAY_SIZE    0
 #else
-#define ZERO_SIZE_ARRAY_SIZE	1
+#define ZERO_SIZE_ARRAY_SIZE    1
 #endif
 
 struct bnls_hdr {
-	uint16_t len PACKED;
-	uint8_t  id PACKED;
-	uint8_t  data[ZERO_SIZE_ARRAY_SIZE] PACKED;
+    uint16_t len PACKED;
+    uint8_t  id PACKED;
+    uint8_t  data[ZERO_SIZE_ARRAY_SIZE] PACKED;
 };
-#define SIZEOF_BNLS_HDR		(3)
+#define SIZEOF_BNLS_HDR     (3)
 
 #define PRODUCT_STAR (0x01)
 #define PRODUCT_SEXP (0x02)
@@ -46,30 +46,30 @@ struct bnls_hdr {
 #define PRODUCT_FIRST PRODUCT_STAR
 #define PRODUCT_LAST PRODUCT_SSHR
 
-#define BNLS_NULL					((uint8_t) 0x00)
-#define BNLS_CDKEY					((uint8_t) 0x01)
-#define BNLS_LOGONCHALLENGE			((uint8_t) 0x02)
-#define BNLS_LOGONPROOF				((uint8_t) 0x03)
-#define BNLS_CREATEACCOUNT			((uint8_t) 0x04)
-#define BNLS_CHANGECHALLENGE		((uint8_t) 0x05)
-#define BNLS_CHANGEPROOF			((uint8_t) 0x06)
-#define BNLS_UPGRADECHALLENGE		((uint8_t) 0x07)
-#define BNLS_UPGRADEPROOF			((uint8_t) 0x08)
-#define BNLS_VERSIONCHECK			((uint8_t) 0x09)
-#define BNLS_CONFIRMLOGON			((uint8_t) 0x0A)
-#define BNLS_HASHDATA				((uint8_t) 0x0B)
-#define BNLS_CDKEY_EX				((uint8_t) 0x0C)
-#define BNLS_CHOOSENLSREVISION		((uint8_t) 0x0D)
-#define BNLS_AUTHORIZE				((uint8_t) 0x0E)
-#define BNLS_AUTHORIZEPROOF			((uint8_t) 0x0F)
-#define BNLS_REQUESTVERSIONBYTE		((uint8_t) 0x10)
-#define BNLS_VERIFYSERVER			((uint8_t) 0x11)
-#define BNLS_RESERVESERVERSLOTS		((uint8_t) 0x12)
-#define BNLS_SERVERLOGONCHALLENGE	((uint8_t) 0x13)
-#define BNLS_SERVERLOGONPROOF		((uint8_t) 0x14)
-#define BNLS_VERSIONCHECKEX			((uint8_t) 0x18)
-#define BNLS_VERSIONCHECKEX2		((uint8_t) 0x1A)
-#define BNLS_WARDEN					((uint8_t) 0x7D)
+#define BNLS_NULL                   ((uint8_t) 0x00)
+#define BNLS_CDKEY                  ((uint8_t) 0x01)
+#define BNLS_LOGONCHALLENGE         ((uint8_t) 0x02)
+#define BNLS_LOGONPROOF             ((uint8_t) 0x03)
+#define BNLS_CREATEACCOUNT          ((uint8_t) 0x04)
+#define BNLS_CHANGECHALLENGE        ((uint8_t) 0x05)
+#define BNLS_CHANGEPROOF            ((uint8_t) 0x06)
+#define BNLS_UPGRADECHALLENGE       ((uint8_t) 0x07)
+#define BNLS_UPGRADEPROOF           ((uint8_t) 0x08)
+#define BNLS_VERSIONCHECK           ((uint8_t) 0x09)
+#define BNLS_CONFIRMLOGON           ((uint8_t) 0x0A)
+#define BNLS_HASHDATA               ((uint8_t) 0x0B)
+#define BNLS_CDKEY_EX               ((uint8_t) 0x0C)
+#define BNLS_CHOOSENLSREVISION      ((uint8_t) 0x0D)
+#define BNLS_AUTHORIZE              ((uint8_t) 0x0E)
+#define BNLS_AUTHORIZEPROOF         ((uint8_t) 0x0F)
+#define BNLS_REQUESTVERSIONBYTE     ((uint8_t) 0x10)
+#define BNLS_VERIFYSERVER           ((uint8_t) 0x11)
+#define BNLS_RESERVESERVERSLOTS     ((uint8_t) 0x12)
+#define BNLS_SERVERLOGONCHALLENGE   ((uint8_t) 0x13)
+#define BNLS_SERVERLOGONPROOF       ((uint8_t) 0x14)
+#define BNLS_VERSIONCHECKEX         ((uint8_t) 0x18)
+#define BNLS_VERSIONCHECKEX2        ((uint8_t) 0x1A)
+#define BNLS_WARDEN                 ((uint8_t) 0x7D)
 
 typedef void (*bnls_packet_handler_t)(struct packet_reader *);
 void bnls_null(struct packet_reader *pr);

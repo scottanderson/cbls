@@ -22,9 +22,9 @@ THE SOFTWARE. */
 #include <stdlib.h>
 
 #ifdef WIN32
-#	include <windows.h>
+#   include <windows.h>
 #else
-#	include "pe_defines.h"
+#   include "pe_defines.h"
 #endif
 
 #include "pe_load.h"
@@ -34,62 +34,62 @@ int process_resource_directory(PIMAGE_RESOURCE_DIRECTORY res_start, PIMAGE_RESOU
 int process_resource_directory_entry(PIMAGE_RESOURCE_DIRECTORY res_start, PIMAGE_RESOURCE_DIRECTORY_ENTRY entry, char *baseaddr);
 
 int pe_get_version(char *filename)
-{       
-	int version;
-	PIMAGE_SECTION_HEADER section;	
-	PIMAGE_RESOURCE_DIRECTORY resource;  
-	char *data = pe_load(filename);	  		
-	section = pe_get_section(data, ".rsrc");	
-	if(section){		
-		resource = (PIMAGE_RESOURCE_DIRECTORY)(data + section->VirtualAddress);				
-		version = process_resource_directory(resource, resource, data);
-		if(version!=0)
-		{
-			return version;
-		}
-	}else{
-		return 0;
-	}	
+{
+    int version;
+    PIMAGE_SECTION_HEADER section;
+    PIMAGE_RESOURCE_DIRECTORY resource;
+    char *data = pe_load(filename);
+    section = pe_get_section(data, ".rsrc");
+    if(section){
+        resource = (PIMAGE_RESOURCE_DIRECTORY)(data + section->VirtualAddress);
+        version = process_resource_directory(resource, resource, data);
+        if(version!=0)
+        {
+            return version;
+        }
+    }else{
+        return 0;
+    }
 
-	return 0;
+    return 0;
 }
 
 int process_resource_directory_entry(PIMAGE_RESOURCE_DIRECTORY res_start, PIMAGE_RESOURCE_DIRECTORY_ENTRY entry, char *baseaddr)
 {
     PIMAGE_RESOURCE_DATA_ENTRY data;
-	PIMAGE_RESOURCE_DIRECTORY_ENTRY v_entry;
-	PIMAGE_RESOURCE_DIRECTORY_ENTRY v_entry2;
-	PIMAGE_RESOURCE_DIRECTORY v_dir;
-	VS_FIXEDFILEINFO *v_info;
-	int version = 0;
-	if(entry->Id == 0x10)
-	{              
-		if(entry->DataIsDirectory)
-		{
-			v_dir = (PIMAGE_RESOURCE_DIRECTORY)((char *)res_start + entry->OffsetToDirectory);
-			v_entry = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)(v_dir + 1);
-			if(v_entry->DataIsDirectory)
-			{
-				v_dir = (PIMAGE_RESOURCE_DIRECTORY)((char *)res_start + v_entry->OffsetToDirectory);
-				v_entry2 = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)(v_dir + 1);
-				data = (PIMAGE_RESOURCE_DATA_ENTRY)((char *)res_start + v_entry2->OffsetToData);						
-				v_info = (VS_FIXEDFILEINFO *)(baseaddr + (data->OffsetToData + 40));
-				
-				version = (((v_info->dwProductVersionMS >> 16) & 0xFF) << 24) 
-					| (((v_info->dwProductVersionMS & 0xFFFF) & 0xFF) << 16) 
-					| (((v_info->dwProductVersionLS >> 16) & 0xFF) << 8) 
-					| ((v_info->dwProductVersionLS & 0xFFFF) & 0xFF);												
-				
-				return version;
-			}					
-		}			        
-	}    
-	
-	if (entry->DataIsDirectory) {
-        version = process_resource_directory(res_start, (void *)((char *)res_start + entry->OffsetToDirectory), baseaddr);   	
-	}	
-	
-	return version;
+    PIMAGE_RESOURCE_DIRECTORY_ENTRY v_entry;
+    PIMAGE_RESOURCE_DIRECTORY_ENTRY v_entry2;
+    PIMAGE_RESOURCE_DIRECTORY v_dir;
+    VS_FIXEDFILEINFO *v_info;
+    int version = 0;
+    if(entry->Id == 0x10)
+    {
+        if(entry->DataIsDirectory)
+        {
+            v_dir = (PIMAGE_RESOURCE_DIRECTORY)((char *)res_start + entry->OffsetToDirectory);
+            v_entry = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)(v_dir + 1);
+            if(v_entry->DataIsDirectory)
+            {
+                v_dir = (PIMAGE_RESOURCE_DIRECTORY)((char *)res_start + v_entry->OffsetToDirectory);
+                v_entry2 = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)(v_dir + 1);
+                data = (PIMAGE_RESOURCE_DATA_ENTRY)((char *)res_start + v_entry2->OffsetToData);
+                v_info = (VS_FIXEDFILEINFO *)(baseaddr + (data->OffsetToData + 40));
+
+                version = (((v_info->dwProductVersionMS >> 16) & 0xFF) << 24)
+                    | (((v_info->dwProductVersionMS & 0xFFFF) & 0xFF) << 16)
+                    | (((v_info->dwProductVersionLS >> 16) & 0xFF) << 8)
+                    | ((v_info->dwProductVersionLS & 0xFFFF) & 0xFF);
+
+                return version;
+            }
+        }
+    }
+
+    if (entry->DataIsDirectory) {
+        version = process_resource_directory(res_start, (void *)((char *)res_start + entry->OffsetToDirectory), baseaddr);
+    }
+
+    return version;
 }
 
 
@@ -98,12 +98,12 @@ int process_resource_directory(PIMAGE_RESOURCE_DIRECTORY res_start, PIMAGE_RESOU
     PIMAGE_RESOURCE_DIRECTORY_ENTRY entry = (void *)(dir + 1);
     int i, version;
     for (i = 0; i < dir->NumberOfNamedEntries + dir->NumberOfIdEntries; i++, entry++)
-	{
-		version = process_resource_directory_entry(res_start, entry, baseaddr);
-		if(version!=0)
-		{
-			return version;
-		}
-	}
+    {
+        version = process_resource_directory_entry(res_start, entry, baseaddr);
+        if(version!=0)
+        {
+            return version;
+        }
+    }
     return 0;
 }
