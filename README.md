@@ -1,6 +1,11 @@
-Install build dependencies
+Install build dependencies (Ubuntu)
 ```
-sudo apt-get install cmake libgmp-dev
+sudo apt install cmake libgmp-dev
+```
+
+Install build dependencies (MacOS)
+```
+brew install gmp
 ```
 
 Build the server

@@ -1,0 +1,52 @@
+name: CMake
+
+on:
+  push:
+    branches: [mainline]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }} ${{ matrix.build_type }}
+    runs-on: ${{ matrix.config.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
+        config:
+          - name: "Ubuntu GCC"
+            os: ubuntu-latest
+            cc: "gcc"
+
+          - name: "Ubuntu Clang"
+            os: ubuntu-latest
+            cc: "clang"
+
+          - name: "MacOS"
+            os: macos-latest
+            cc: "clang"
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Linux Dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt install libgmp-dev
+
+      - name: Install MacOS Dependencies
+        if: runner.os == 'MacOS'
+        run: brew install gmp
+
+      - name: CMake Configure
+        run: >
+          cmake -B ${{github.workspace}}/build
+          -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+          -DCMAKE_C_COMPILER=${{matrix.config.cc}}
+
+      - name: CMake Build
+        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
+
+      - name: CMake Test
+        run: ctest --test-dir ${{github.workspace}}/build -C ${{matrix.build_type}} -V
