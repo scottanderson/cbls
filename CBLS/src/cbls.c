@@ -5,6 +5,7 @@
  *      Author: Scott
  */
 
+#include <errno.h>
 #include <string.h>
 #include "sys_deps.h"
 #include "sys_net.h"

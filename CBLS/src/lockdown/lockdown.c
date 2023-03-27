@@ -335,7 +335,7 @@ int process_section(LD_SHA1_CTX *ctx, t_lockdown_heap *lockdown_heap, char *base
     int i;
     int *lockdown_memory = (int*) lockdown_heap->memory; /* Lets us address the memory as an int, which cleans up a lot of code. */
     char *allocated_memory_base;
-    int lower_offset = (int)baseaddr - (int)preferred_baseaddr;
+    int lower_offset = (uintptr_t)baseaddr - (uintptr_t)preferred_baseaddr;
 
     virtual_addr = section->VirtualAddress;
     virtual_size = section->Misc.VirtualSize;
@@ -367,11 +367,11 @@ int process_section(LD_SHA1_CTX *ctx, t_lockdown_heap *lockdown_heap, char *base
                 eax = 0;
                 if(index < lockdown_heap->currentlength)
                 {
-                    eax = (int)(lockdown_memory[memory_offset] + starting_memory - virtual_addr);
+                    eax = (uintptr_t)(lockdown_memory[memory_offset] + starting_memory - virtual_addr);
                 }
                 if(eax)
                 {
-                    eax = eax - (int)ptr_memory;
+                    eax = eax - (uintptr_t)ptr_memory;
                     if(eax < section_length)
                     {
                         section_length = eax;
@@ -406,7 +406,7 @@ int process_section(LD_SHA1_CTX *ctx, t_lockdown_heap *lockdown_heap, char *base
                 if(index < lockdown_heap->currentlength)
                 {
                     value = *(int*)(lockdown_heap->memory + (index * 16));
-                    eax = (int)(value - virtual_size - virtual_addr + allocated_memory_base);
+                    eax = (uintptr_t)(value - virtual_size - virtual_addr + allocated_memory_base);
                 }
                 bytes += i;
                 if(eax)

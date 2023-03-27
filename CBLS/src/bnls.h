@@ -24,10 +24,10 @@
 #define ZERO_SIZE_ARRAY_SIZE    1
 #endif
 
-struct bnls_hdr {
-    uint16_t len PACKED;
-    uint8_t  id PACKED;
-    uint8_t  data[ZERO_SIZE_ARRAY_SIZE] PACKED;
+struct PACKED bnls_hdr {
+    uint16_t len;
+    uint8_t  id;
+    uint8_t  data[ZERO_SIZE_ARRAY_SIZE];
 };
 #define SIZEOF_BNLS_HDR     (3)
 

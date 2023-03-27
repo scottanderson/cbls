@@ -5,11 +5,12 @@
  *      Author: Scott
  */
 
+#include <arpa/inet.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <io.h> // write()
+#include <time.h>
 #include "sys_net.h"
 #include "inetlib.h"
 #include "xmalloc.h"
@@ -42,7 +43,7 @@ cbls_log (const char *fmt, ...)
 
     time(&t);
     tm = localtime(&t);
-    strftime(buf, 21, "%H:%M:%S %m/%d/%Y\t", tm);
+    strftime(buf, 21, "%Y-%m-%d %H:%M:%S\t", tm);
     va_start(ap, fmt);
     len = vsnprintf(&buf[20], sizeof(buf) - 24, fmt, ap);
     va_end(ap);
@@ -50,8 +51,8 @@ cbls_log (const char *fmt, ...)
         len = sizeof(buf) - 24;
     len += 20;
     buf[len++] = '\n';
-    write(/*log_fd*/1, buf, len);
-    SYS_fsync(/*log_fd*/1);
+    fwrite(buf, len, 1, stdout);
+    fflush(stdout);
 }
 
 int
@@ -147,7 +148,7 @@ listen_ready_read (int fd)
 {
     int s;
     struct SOCKADDR_IN saddr;
-    int siz = sizeof(saddr);
+    socklen_t siz = sizeof(saddr);
     char abuf[16];
     struct cbls_conn *cbls;
 
