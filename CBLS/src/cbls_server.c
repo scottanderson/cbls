@@ -211,6 +211,16 @@ main(int argc __attribute__((__unused__)), char **argv __attribute__((__unused__
         exit(1);
     }
 
+    const int enable = 1;
+    if (setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+        cbls_log("setsockopt(SO_REUSEADDR) failed");
+        exit(1);
+    }
+    if (setsockopt(listen_sock, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
+        cbls_log("setsockopt(SO_REUSEPORT) failed");
+        exit(1);
+    }
+
     int port = 9367;
 
     struct sockaddr_in saddr;
