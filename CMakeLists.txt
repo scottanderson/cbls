@@ -4,7 +4,12 @@ project(cbls)
 
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_C_STANDARD 99)
-add_compile_options(-Werror)
+
+if(APPLE)
+    include_directories("/usr/local/include")
+endif()
+
+include(cmake/gmp.cmake)
 
 # Collect all source files recursively
 file(GLOB_RECURSE SOURCES
@@ -19,5 +24,5 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_executable(cbls ${SOURCES})
 
 # Link against the required libraries
-target_link_libraries(cbls gmp)
+target_link_libraries(cbls ${GMP_LIBRARIES})
 
